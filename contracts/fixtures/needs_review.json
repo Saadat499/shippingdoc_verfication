@@ -1,0 +1,12 @@
+{
+  "email_id": "email_501",
+  "category": "BL_COMPARISON",
+  "status": "NEEDS_REVIEW",
+  "review_reason": "wrong_doc_type",
+  "decided_by": "rule",
+  "si_path": "attachments/email_501_SI.txt",
+  "bl_path": "attachments/email_501_BL.txt",
+  "fields": [],
+  "defect_fields": [],
+  "notes": null
+}

@@ -1,0 +1,125 @@
+{
+  "email_id": "email_001",
+  "category": "BL_COMPARISON",
+  "status": "OK",
+  "review_reason": null,
+  "decided_by": "rule",
+  "si_path": "attachments/email_001_SI.txt",
+  "bl_path": "attachments/email_001_BL.txt",
+  "fields": [
+    {
+      "field": "shipper",
+      "si": {
+        "raw": "APRIL FAR EAST (M) SDN BHD",
+        "value": "APRIL FAR EAST (M) SDN BHD",
+        "evidence": "Shipper/Exporter: APRIL FAR EAST (M) SDN BHD",
+        "found": true
+      },
+      "bl": {
+        "raw": "APRIL FAR EAST (M) SDN BHD",
+        "value": "APRIL FAR EAST (M) SDN BHD",
+        "evidence": "SHIPPER: APRIL FAR EAST (M) SDN BHD",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "consignee",
+      "si": {
+        "raw": "MOORIM SP CO., LTD",
+        "value": "MOORIM SP CO., LTD",
+        "evidence": "CONSIGNEE: MOORIM SP CO., LTD",
+        "found": true
+      },
+      "bl": {
+        "raw": "MOORIM SP CO., LTD",
+        "value": "MOORIM SP CO., LTD",
+        "evidence": "CONSIGNEE: MOORIM SP CO., LTD",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "notify_party",
+      "si": {
+        "raw": "UAB NOVAKOPA",
+        "value": "UAB NOVAKOPA",
+        "evidence": "NOTIFY PARTY: UAB NOVAKOPA",
+        "found": true
+      },
+      "bl": {
+        "raw": "UAB NOVAKOPA",
+        "value": "UAB NOVAKOPA",
+        "evidence": "Notify: UAB NOVAKOPA",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "port_of_loading",
+      "si": {
+        "raw": "PORT KLANG (WESTPORT), MALAYSIA (MYPKG)",
+        "value": "PORT KLANG (WESTPORT), MALAYSIA (MYPKG)",
+        "evidence": "Port of Loading: PORT KLANG (WESTPORT), MALAYSIA (MYPKG)",
+        "found": true
+      },
+      "bl": {
+        "raw": "PORT KLANG (WESTPORT), MALAYSIA (MYPKG)",
+        "value": "PORT KLANG (WESTPORT), MALAYSIA (MYPKG)",
+        "evidence": "Port of Loading (POL): PORT KLANG (WESTPORT), MALAYSIA (MYPKG)",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "port_of_discharge",
+      "si": {
+        "raw": "CALLAO, PERU (PECLL)",
+        "value": "CALLAO, PERU (PECLL)",
+        "evidence": "Discharge Port: CALLAO, PERU (PECLL)",
+        "found": true
+      },
+      "bl": {
+        "raw": "CALLAO, PERU (PECLL)",
+        "value": "CALLAO, PERU (PECLL)",
+        "evidence": "POD: CALLAO, PERU (PECLL)",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "container_count",
+      "si": {
+        "raw": "1 x 40'HC",
+        "value": "1 x 40'HC",
+        "evidence": "No. of Containers or Packages: 1 x 40'HC",
+        "found": true
+      },
+      "bl": {
+        "raw": "1 x 40'HC",
+        "value": "1 x 40'HC",
+        "evidence": "Container Count: 1 x 40'HC",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "gross_weight_kg",
+      "si": {
+        "raw": "21,577 KG",
+        "value": "21,577 KG",
+        "evidence": "Gross Weight (KG): 21,577 KG",
+        "found": true
+      },
+      "bl": {
+        "raw": "21,577 KG",
+        "value": "21,577 KG",
+        "evidence": "Gross Wt (kgs): 21,577 KG",
+        "found": true
+      },
+      "outcome": "MATCH"
+    }
+  ],
+  "defect_fields": [],
+  "notes": null
+}

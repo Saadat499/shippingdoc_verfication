@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run tests
+        run: python3 -m pytest tests/ -v
+      - name: Run full pipeline + score
+        run: python3 cli/run.py data --score data/ground_truth.json --out submission.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: submission
+          path: submission.json

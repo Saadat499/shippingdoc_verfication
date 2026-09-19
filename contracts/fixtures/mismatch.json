@@ -1,0 +1,128 @@
+{
+  "email_id": "email_004",
+  "category": "BL_COMPARISON",
+  "status": "MISMATCH",
+  "review_reason": null,
+  "decided_by": "rule",
+  "si_path": "attachments/email_004_SI.txt",
+  "bl_path": "attachments/email_004_BL.txt",
+  "fields": [
+    {
+      "field": "shipper",
+      "si": {
+        "raw": "APRIL FAR EAST (M) SDN BHD",
+        "value": "APRIL FAR EAST (M) SDN BHD",
+        "evidence": "Shipper: APRIL FAR EAST (M) SDN BHD",
+        "found": true
+      },
+      "bl": {
+        "raw": "APRIL FAR EAST (M) SDN BHD",
+        "value": "APRIL FAR EAST (M) SDN BHD",
+        "evidence": "SHIPPER: APRIL FAR EAST (M) SDN BHD",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "consignee",
+      "si": {
+        "raw": "EAST BRIGHT FZ-LLC",
+        "value": "EAST BRIGHT FZ-LLC",
+        "evidence": "Consignee (Non-Negotiable): EAST BRIGHT FZ-LLC",
+        "found": true
+      },
+      "bl": {
+        "raw": "UAB NOVAKOPA",
+        "value": "UAB NOVAKOPA",
+        "evidence": "To the Order of: UAB NOVAKOPA",
+        "found": true
+      },
+      "outcome": "MISMATCH"
+    },
+    {
+      "field": "notify_party",
+      "si": {
+        "raw": "EAST BRIGHT FZ-LLC",
+        "value": "EAST BRIGHT FZ-LLC",
+        "evidence": "Notify: EAST BRIGHT FZ-LLC",
+        "found": true
+      },
+      "bl": {
+        "raw": "UAB NOVAKOPA",
+        "value": "UAB NOVAKOPA",
+        "evidence": "Notify Party: UAB NOVAKOPA",
+        "found": true
+      },
+      "outcome": "MISMATCH"
+    },
+    {
+      "field": "port_of_loading",
+      "si": {
+        "raw": "NANTONG, CHINA (CNNTG)",
+        "value": "NANTONG, CHINA (CNNTG)",
+        "evidence": "Port of Loading (POL): NANTONG, CHINA (CNNTG)",
+        "found": true
+      },
+      "bl": {
+        "raw": "NANTONG, CHINA (CNNTG)",
+        "value": "NANTONG, CHINA (CNNTG)",
+        "evidence": "Port of Loading (POL): NANTONG, CHINA (CNNTG)",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "port_of_discharge",
+      "si": {
+        "raw": "KARACHI, PAKISTAN (PKKHI)",
+        "value": "KARACHI, PAKISTAN (PKKHI)",
+        "evidence": "POD: KARACHI, PAKISTAN (PKKHI)",
+        "found": true
+      },
+      "bl": {
+        "raw": "KARACHI, PAKISTAN (PKKHI)",
+        "value": "KARACHI, PAKISTAN (PKKHI)",
+        "evidence": "POD: KARACHI, PAKISTAN (PKKHI)",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "container_count",
+      "si": {
+        "raw": "6 x 40'HC",
+        "value": "6 x 40'HC",
+        "evidence": "Total Containers: 6 x 40'HC",
+        "found": true
+      },
+      "bl": {
+        "raw": "6 x 40'HC",
+        "value": "6 x 40'HC",
+        "evidence": "Container Count: 6 x 40'HC",
+        "found": true
+      },
+      "outcome": "MATCH"
+    },
+    {
+      "field": "gross_weight_kg",
+      "si": {
+        "raw": "131,058 KG",
+        "value": "131,058 KG",
+        "evidence": "Gross Wt (kgs): 131,058 KG",
+        "found": true
+      },
+      "bl": {
+        "raw": "131,058 KG",
+        "value": "131,058 KG",
+        "evidence": "Gross Weight (KG): 131,058 KG",
+        "found": true
+      },
+      "outcome": "MATCH"
+    }
+  ],
+  "defect_fields": [
+    "consignee",
+    "notify_party"
+  ],
+  "notes": null
+}

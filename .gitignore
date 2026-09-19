@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Node / frontend
+node_modules/
+dist/
+.env
+.env.*
+
+# secrets
+*serviceAccount*.json
+*credentials*.json
+
+# scratch submissions (regenerate with cli/run.py, don't commit stale ones)
+submission.json
+/tmp/
+
+# frontend generated data (regenerate with frontend/build_data.py)
+# NOTE: results.json is intentionally NOT ignored — commit it so GitHub
+# Pages can serve it as a static file.
+
+# NOTE: ground_truth.json and the data_v2/ generator ARE allowed in this repo
+# per the organizer's ruling at the opening workshop (dataset is synthetic).
+# If that changes, uncomment the lines below.
+# data/ground_truth.json
+# generator/
