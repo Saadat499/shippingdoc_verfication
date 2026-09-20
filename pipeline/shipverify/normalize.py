@@ -33,6 +33,6 @@ def normalize(field: str, value: str | None) -> str | None:
 
 def _fold(v: str) -> str:
     v = v.upper()
-    v = re.sub(r"[.,]", "", v)
+    v = re.sub(r"[.,|;]", "", v)
     v = re.sub(r"\s+", " ", v)
     return v.strip()
