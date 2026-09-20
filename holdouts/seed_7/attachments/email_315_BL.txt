@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper: ASIA PACIFIC PAPERBOARD TRADING PTE LTD
+  #813, 4 EA, DUBAI AIRPORT FREE ZONE; P.O. BOX: 293775, DUBAI, UNITED ARAB EMIRATES
+Consignee (Non-Negotiable): UAB NOVAKOPA
+  SAVANORIU PR. 187; LT-02300 VILNIUS, LITHUANIA
+Notify Party/Intermediate Consignee: UAB NOVAKOPA
+Load Port: PORT KLANG (WESTPORT), MALAYSIA (MYPKG)
+Port of Discharge (POD): CEBU, PHILIPPINES (PHCEB)
+Container Count: 5 x 40'HC
+Gross Wt (kgs): 108,980 KG
+Vessel: SOLID 16 V.044NW2
+Voyage No.: QI540A
+Description of Goods: PAPERONE DIGITAL COPIER PAPER
+B/L No.: EGLV242571527264
+Booking Reference: 070500268288
+Freight: PREPAID

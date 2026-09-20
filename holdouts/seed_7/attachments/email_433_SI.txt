@@ -1,0 +1,19 @@
+SHIPPING INSTRUCTION
+========================================
+
+Shipper: ASIA PACIFIC PAPERBOARD TRADING PTE LTD
+  80 RAFFLES PLACE, #50-01 UOB PLAZA 1; SINGAPORE 048624
+Consignee (Non-Negotiable): ROXCEL TRADING GMBH
+  OPERNRING 3-5; 1010 VIENNA, AUSTRIA
+Notify Party/Intermediate Consignee: ROXCEL TRADING GMBH
+Port of Loading (POL): SINGAPORE (SGSIN)
+Port of Discharge (POD): VALPARAISO, CHILE (CLVAP)
+Container Count: 1 x 20'FCL
+Gross Weight毛重(KGS): 21,846 KG
+Ocean Vessel: INDO SUKSES 65 V.51NW1
+Voy.: 051NW1
+Description of Goods: FUJITO PAPERONE INKJET PAPER
+HS Code: 48025500
+Booking No.: SIN793776423
+OC No.: 5RSG-24558
+Freight: PREPAID

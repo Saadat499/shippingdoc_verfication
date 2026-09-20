@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper (Principal or Seller): APRIL FAR EAST (M) SDN BHD
+  TOWER 2, AVENUE 5, LEVEL 6; BANGSAR SOUTH CITY, NO. 8 JALAN KERINCHI; 59200 KUALA LUMPUR, MALAYSIA
+Consignee (Non-Negotiable): INTERNATIONAL FOREST PRODUCTS LLC
+  6 HOLLIS STREET; SUITE 100; FRAMINGHAM, MA 01702, USA
+Notify: PACIFIC OFFICE (M) SDN BHD
+Port of Loading: SINGAPORE (SGSIN)
+POD: HOUSTON, US (USHOU)
+Container Count: 10 x 20'GP
+Gross Weight毛重(KGS): 219,260 KG
+Export Carrier (vessel, voyage): LE HAVRE V.QI540A
+Voyage: BS291
+Kinds of Packages; Description of Goods: PAPERBOARD
+Bill of Lading No.: SIN216656675
+Booking Ref: SIN522886423
+Freight: PREPAID

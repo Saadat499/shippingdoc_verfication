@@ -1,0 +1,13 @@
+PACKING LIST
+========================================
+
+Shipper: APRIL FINE PAPER TRADING
+Consignee: VITAL SOLUTIONS PTE. LTD.
+Booking Ref: MCLSINJEA2587353
+Commodity: FUJITO PAPERONE INKJET PAPER
+
+Carton No.      Net Wt (kg)     Gross Wt (kg)     Dimensions
+CTN-001          460             626             120x100x110
+CTN-002          401             485             120x100x110
+
+*** PACKING LIST ONLY - NO PORT OR VESSEL DETAILS ***

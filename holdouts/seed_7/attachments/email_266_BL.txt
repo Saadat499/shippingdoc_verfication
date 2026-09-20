@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper (Principal or Seller): APRIL FAR EAST (M) SDN BHD
+  TOWER 2, AVENUE 5, LEVEL 6; BANGSAR SOUTH CITY, NO. 8 JALAN KERINCHI; 59200 KUALA LUMPUR, MALAYSIA
+Consignee: PACIFIC OFFICE (M) SDN BHD
+  LOT 6, JALAN P/7; SECTION 13, 43650 BANDAR BARU BANGI; SELANGOR, MALAYSIA
+Notify Party: KTP CO., LTD
+Load Port: BUATAN, INDONESIA (IDBUA)
+Port of Discharge: HOUSTON, US (USHOU)
+Container Count: 5 x 40'HC
+Gross Wt (kgs): 110,160 KG
+Export Carrier (vessel, voyage): VISION 202 V.002
+Voyage: BS291
+Commodity: PAPERONE DIGITAL COPIER PAPER
+B/L NUMBER: SIJ3656297
+Booking Reference: SIJ9980993
+Freight: PREPAID

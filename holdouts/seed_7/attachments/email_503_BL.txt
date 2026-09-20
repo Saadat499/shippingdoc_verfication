@@ -1,0 +1,15 @@
+PACKING LIST
+========================================
+
+Shipper: APRIL FAR EAST (M) SDN BHD
+Consignee: CLIFFORD PAPER INC
+Booking Ref: I421162776
+Commodity: PAPERBOARD
+
+Carton No.      Net Wt (kg)     Gross Wt (kg)     Dimensions
+CTN-001          520             560             120x100x110
+CTN-002          571             515             120x100x110
+CTN-003          477             483             120x100x110
+CTN-004          519             598             120x100x110
+
+*** PACKING LIST ONLY - NO PORT OR VESSEL DETAILS ***
