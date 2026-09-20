@@ -30,9 +30,8 @@ def normalize(field: str, value: str | None) -> str | None:
     # shipper / consignee / notify_party: whitespace/case/punctuation only
     return _fold(v)
 
-
 def _fold(v: str) -> str:
     v = v.upper()
-    v = re.sub(r"[.,]", "", v)
+    v = re.sub(r"[.,|;]", "", v)
     v = re.sub(r"\s+", " ", v)
     return v.strip()
