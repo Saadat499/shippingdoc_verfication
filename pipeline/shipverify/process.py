@@ -29,10 +29,17 @@ def process_email(email: dict, read_bytes) -> EmailResult:
     attachments = email.get("attachments", [])
 
     if len(attachments) == 0:
+        body = email.get("body", "").lower()
+        if "dropped" in body or "appear to have been" in body or "missing" in body:
+            # body explicitly flags that attachments should have been there
+            # but weren't -- a real missing_attachment case, not a plain
+            # "please send the draft BL" request.
+            return EmailResult(email_id=email_id, category=category, status=Status.NEEDS_REVIEW,
+                                review_reason=ReviewReason.MISSING_ATTACHMENT,
+                                decided_by=decided_by,
+                                notes="Body indicates attachments were dropped.")
         # e.g. "please send the draft BL for checking" with nothing attached
-        # yet, OR an SI written entirely in the body. Treated as OK unless the
-        # body explicitly says something is missing (handled in classify.py
-        # by routing those to here with 1 attachment case below).
+        # yet, OR an SI written entirely in the body.
         return EmailResult(email_id=email_id, category=category, status=Status.OK,
                             decided_by=decided_by,
                             notes="No attachments; nothing to compare.")

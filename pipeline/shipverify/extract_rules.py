@@ -42,7 +42,7 @@ SYNONYMS: dict[str, list[str]] = {
 }
 
 # document-title -> whether it's an SI or a BL (for wrong_doc_type detection)
-SI_TITLES = ["shipping instruction", "s.i.", "bl instruction"]
+SI_TITLES = ["shipping instruction", "s.i.", "bl instruction", "bill of lading instruction"]
 BL_TITLES = ["bill of lading"]
 OTHER_DOC_TITLES = [
     "certificate of origin", "packing list", "commercial invoice", "invoice",
@@ -81,6 +81,26 @@ def classify_document_title(title: str) -> str:
     return "UNKNOWN"
 
 
+# Some PDF layouts print a label with no colon at all, e.g.
+# "Shipper APRIL FINE PAPER TRADING" instead of "Shipper: APRIL FINE...".
+# Sorted longest-variant-first so "consignee (non-negotiable)" is tried
+# before the shorter "consignee", or the parenthetical would leak into value.
+_COLONLESS_CANDIDATES = sorted(
+    ((variant, field) for field, variants in SYNONYMS.items() for variant in variants),
+    key=lambda x: -len(x[0]),
+)
+
+
+def _match_colonless(line: str) -> tuple[str, str] | None:
+    cleaned = _CJK_PAREN_RE.sub("", line)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    lower = cleaned.lower()
+    for variant, field in _COLONLESS_CANDIDATES:
+        if lower.startswith(variant + " "):
+            return field, cleaned[len(variant):].strip()
+    return None
+
+
 def is_missing_value(raw: str) -> bool:
     v = raw.strip().lower().replace(" ", "")
     if v in MISSING_MARKERS:
@@ -99,12 +119,29 @@ def extract_fields(lines: list[str]) -> dict[str, FieldValue]:
     fallback_total_weight: str | None = None
 
     for line in lines:
-        m = _LABEL_RE.match(line)
-        if not m:
-            # table-style total line, e.g. "TOTAL Gross Weight (KG): 131,322 KG"
-            tm = re.search(r"total gross weight[^:]*:\s*([\d,.]+\s*kg)", line, re.I)
+        # Check the total-weight fallback on EVERY line, not just ones that
+        # fail the normal label match -- "TOTAL Gross Wt (kgs): 131,322 KG"
+        # has a colon (so it matches _LABEL_RE below), but "TOTAL Gross Wt
+        # (kgs)" isn't itself a recognized label, so it would otherwise be
+        # silently dropped before this fallback ever got a chance to run.
+        if fallback_total_weight is None:
+            tm = re.search(r"total\s+gross\s+w\w*[^:]*:\s*([\d,.]+\s*kg)", line, re.I)
             if tm:
                 fallback_total_weight = tm.group(1)
+
+        m = _LABEL_RE.match(line)
+        if not m:
+            # no colon at all -- some PDF layouts print "Label Value" directly
+            cm = _match_colonless(line)
+            if cm is None:
+                continue
+            field, value = cm
+            if field in out and out[field].found:
+                continue
+            if is_missing_value(value):
+                out[field] = FieldValue(raw=value, value=None, evidence=line, found=False)
+            else:
+                out[field] = FieldValue(raw=value, value=value, evidence=line, found=True)
             continue
 
         label, value = m.group(1), m.group(2).strip()
