@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper (Principal or Seller): APRIL FINE PAPER TRADING
+  ON BEHALF OF VITAL SOLUTIONS PTE LTD; 77 ROBINSON ROAD, #21-01; SINGAPORE 068896
+Consignee (Non-Negotiable): TOAN LUC PAPER JOINT STOCK COMPANY
+  LOT B, TAN DONG HIEP B IZ; DI AN, BINH DUONG, VIETNAM
+Notify Party/Intermediate Consignee: TOAN LUC PAPER JOINT STOCK COMPANY
+Port of Loading: NHAVA SHEVA, INDIA (INNSA)
+Port of Discharge: BRISBANE, AUSTRALIA (AUBNE)
+No. of Containers or Packages: 3 x 20'FCL
+Gross Wt (kgs): 61,092 KG
+Ocean Vessel: SOLID 16 V.044NW2
+Voyage: 11S
+Commodity: UNCOATED WOODFREE PAPER IN REAMS
+B/L No.: HLCUSIN341533647
+Booking Ref: 17641845
+Freight: PREPAID

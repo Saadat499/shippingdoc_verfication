@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper (Principal or Seller): APRIL FAR EAST (M) SDN BHD
+  TOWER 2, AVENUE 5, LEVEL 6; BANGSAR SOUTH CITY, NO. 8 JALAN KERINCHI; 59200 KUALA LUMPUR, MALAYSIA
+To the Order of: CERIEX
+  ZONE INDUSTRIELLE; CONAKRY, GUINEA
+Notify: UAB NOVAKOPA
+POL: NHAVA SHEVA, INDIA (INNSA)
+Discharge Port: JEBEL ALI, UAE (AEJEA)
+No. of Containers: 5 x 20'FCL
+GROSS WEIGHT: 117,610 KG
+Ocean Vessel: VISION 202 V.002
+Voyage: 2545E
+Kinds of Packages; Description of Goods: FUJITO PAPERONE INKJET PAPER
+BL No.: SIJ6092039
+Booking Ref: SIJ9875319
+Freight: PREPAID

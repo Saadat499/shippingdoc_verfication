@@ -1,0 +1,15 @@
+PACKING LIST
+========================================
+
+Shipper: APRIL FINE PAPER TRADING (MIDDLE EAST) FZE
+Consignee: HABRAS INTERNATIONAL LIMITED
+Booking Ref: 14582477
+Commodity: FUJITO PAPERONE INKJET PAPER
+
+Carton No.      Net Wt (kg)     Gross Wt (kg)     Dimensions
+CTN-001          412             478             120x100x110
+CTN-002          483             519             120x100x110
+CTN-003          505             492             120x100x110
+CTN-004          472             587             120x100x110
+
+*** PACKING LIST ONLY - NO PORT OR VESSEL DETAILS ***

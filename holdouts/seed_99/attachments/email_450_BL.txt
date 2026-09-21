@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper (Principal or Seller): ASIA PACIFIC PAPERBOARD TRADING PTE LTD
+  80 RAFFLES PLACE, #50-01 UOB PLAZA 1; SINGAPORE 048624
+To the Order of: SAFQA LIMITED
+  P.O. BOX 99423-80100; TONONOKA ROAD; MOMBASA, KENYA; PIN NO.: P051376597X
+Notify: SAFQA LIMITED
+Port of Loading (POL): SINGAPORE (SGSIN)
+Port of Discharge: LONG BEACH, US (MMRGN)
+No. of Containers or Packages: 3 x 20'FCL
+Gross Weight (KG): 87,060 KG
+Vessel: VISION 202 V.002
+Voy.: 051NW1
+Kinds of Packages; Description of Goods: UNCOATED WOODFREE PAPER IN REAMS
+Bill of Lading No.: SINF34379783
+Booking Ref: ONEYSINF53667
+Freight: PREPAID

@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper: APRIL FINE PAPER TRADING
+  ON BEHALF OF VITAL SOLUTIONS PTE LTD; 77 ROBINSON ROAD, #21-01; SINGAPORE 068896
+Consignee: CERIEX
+  ZONE INDUSTRIELLE; CONAKRY, GUINEA
+Notify Party/Intermediate Consignee: ROXCEL TRADING GMBH
+Port of Loading: PORT KLANG (WESTPORT), MALAYSIA (MYPKG)
+Discharge Port: HOUSTON, US (USHOU)
+No. of Containers: 4 x 20'GP
+Gross Wt (kgs): 60,741 KG
+Export Carrier (vessel, voyage): VISION 202 V.002
+Voyage No.: 051NW1
+Description of Goods: FUJITO PAPERONE INKJET PAPER
+BL No.: MCLSIN4161859
+Booking Reference: MCLSINJEA2556727
+Freight: PREPAID

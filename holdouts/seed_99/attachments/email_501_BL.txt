@@ -1,0 +1,17 @@
+COMMERCIAL INVOICE
+========================================
+
+Invoice No.: 5250074031
+Invoice Date: 10-JAN-2026
+Seller: ASIA PACIFIC PAPERBOARD TRADING PTE LTD
+Buyer: ORIENT LINKS CO (LLC)
+Booking Ref: I314775811
+
+Description                         Qty        Unit Price       Amount (USD)
+FUJITO PAPERONE INKJET PAPER       400     45.00           18,000
+
+Total Amount: USD 18,000.00
+Payment Terms: 30 days from B/L date
+Incoterms: CFR
+
+*** THIS IS A COMMERCIAL INVOICE - NOT A SHIPPING INSTRUCTION ***

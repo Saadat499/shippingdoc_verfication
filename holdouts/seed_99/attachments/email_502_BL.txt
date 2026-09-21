@@ -1,0 +1,12 @@
+PACKING LIST
+========================================
+
+Shipper: APRIL FAR EAST (M) SDN BHD
+Consignee: NAGAPPA EXPORTS
+Booking Ref: SIJ9005175
+Commodity: PAPERONE DIGITAL COPIER PAPER
+
+Carton No.      Net Wt (kg)     Gross Wt (kg)     Dimensions
+CTN-001          486             613             120x100x110
+
+*** PACKING LIST ONLY - NO PORT OR VESSEL DETAILS ***

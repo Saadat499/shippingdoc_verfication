@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper/Exporter: APRIL FINE PAPER TRADING
+  ON BEHALF OF VITAL SOLUTIONS PTE LTD; 77 ROBINSON ROAD, #21-01; SINGAPORE 068896
+Consignee: UAB NOVAKOPA
+  SAVANORIU PR. 187; LT-02300 VILNIUS, LITHUANIA
+Notify Party: UAB NOVAKOPA
+Port of Loading: PORT KLANG (WESTPORT), MALAYSIA (MYPKG)
+PORT OF DISCHARGE: LONG BEACH, US (USLGB)
+No. of Containers or Packages: 15 x 20'FCL
+Gross Weight (KG): 306,285 KG
+Export Carrier (vessel, voyage): LE HAVRE V.QI540A
+Voy. No: BS012
+Kinds of Packages; Description of Goods: PAPERBOARD
+Bill of Lading No.: SIJ5657183
+BOOKING NO.: SIJ1564811
+Freight: PREPAID

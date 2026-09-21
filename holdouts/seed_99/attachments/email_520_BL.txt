@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper/Exporter: ASIA PACIFIC PAPERBOARD TRADING PTE LTD
+  80 RAFFLES PLACE, #50-01 UOB PLAZA 1; SINGAPORE 048624
+Consignee: AL GURG STATIONERY LLC
+  P.O. BOX 5069; DUBAI, UNITED ARAB EMIRATES
+Notify Party/Intermediate Consignee: AL GURG STATIONERY LLC
+PORT OF LOADING: PORT KLANG (WESTPORT), MALAYSIA (MYPKG)
+Port of Discharge (POD): GDANSK, POLAND (PLGDN)
+Total Containers: 2 x 20'GP
+Gross Wt (kgs): 42,370 KG
+Ocean Vessel: SOLID 16 V.044NW2
+Voy. No: 2545E
+Description of Goods: PAPERBOARD
+B/L No.: SINF75307521
+Booking Ref: ONEYSINF09385
+Freight: PREPAID

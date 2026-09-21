@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper: APRIL FAR EAST (M) SDN BHD
+  80 RAFFLES PLACE, #50-01 UOB PLAZA 1; SINGAPORE 048624
+Consignee (Non-Negotiable): ORIENT LINKS CO (LLC)
+  P.O. BOX 61041; JEBEL ALI, DUBAI, UAE
+NOTIFY PARTY: ORIENT LINKS CO (LLC)
+Load Port: SINGAPORE (SGSIN)
+Port of Discharge (POD): KOPER, SLOVENIA (SIKOP)
+Total Containers: 2 x 20'FCL
+Gross Weight毛重(KGS): 45,106 KG
+Export Carrier (vessel, voyage): VISION 202 V.002
+Voyage No.: QI540A
+Description of Goods: PAPERBOARD
+BL No.: SIN879893010
+BOOKING NO.: SIN578394345
+Freight: PREPAID

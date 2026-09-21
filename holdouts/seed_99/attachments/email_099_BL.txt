@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper (Principal or Seller): ASIA PACIFIC PAPERBOARD TRADING PTE LTD
+  80 RAFFLES PLACE, #50-01 UOB PLAZA 1; SINGAPORE 048624
+Consignee (Non-Negotiable): EAST BRIGHT FZ-LLC
+  RAKEZ AMENITY CENTER; AL HAMRA INDUSTRIAL ZONE, RAK, UAE
+Notify Party/Intermediate Consignee: PACIFIC OFFICE (M) SDN BHD
+Port of Loading (POL): BUATAN, INDONESIA (IDBUA)
+Port of Discharge (POD): HOUSTON, US (USHOU)
+Container Count: 15 x 40'HC
+Gross Wt (kgs): 342,330 KG
+Export Carrier (vessel, voyage): SOLID 16 V.044NW2
+Voyage No.: BS291
+Description: ASIA SYMBOL FOOD SERVICE BOARD (CUPSTOCK/HI-BULK) - ALLINONE
+B/L NUMBER: SINF54828600
+Booking Ref: ONEYSINF16505
+Freight: PREPAID

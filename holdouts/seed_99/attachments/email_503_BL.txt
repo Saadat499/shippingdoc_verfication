@@ -1,0 +1,15 @@
+PACKING LIST
+========================================
+
+Shipper: APRIL FINE PAPER TRADING
+Consignee: KPP-ANTALIS (SINGAPORE) PTE. LTD.
+Booking Ref: PSGSE8865545
+Commodity: PAPERBOARD
+
+Carton No.      Net Wt (kg)     Gross Wt (kg)     Dimensions
+CTN-001          523             457             120x100x110
+CTN-002          475             623             120x100x110
+CTN-003          598             499             120x100x110
+CTN-004          550             640             120x100x110
+
+*** PACKING LIST ONLY - NO PORT OR VESSEL DETAILS ***

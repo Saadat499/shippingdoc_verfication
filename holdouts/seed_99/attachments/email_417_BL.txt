@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper: APRIL FINE PAPER TRADING (MIDDLE EAST) FZE
+  80 RAFFLES PLACE, #50-01 UOB PLAZA 1; SINGAPORE 048624
+Consignee (Non-Negotiable): AL GURG STATIONERY LLC
+  P.O. BOX 5069; DUBAI, UNITED ARAB EMIRATES
+Notify Party/Intermediate Consignee: SAFQA LIMITED
+Port of Loading (POL): PORT KLANG (WESTPORT), MALAYSIA (MYPKG)
+Discharge Port: SAVANNAH, US (USSAV)
+Total Containers: 6 x 40'HC
+Gross Weight (KG): 133,638 KG
+Ocean Vessel: PACIFIC SUN 1 V.251073E
+Voyage: 2545E
+Description of Goods: PAPERBOARD
+B/L NUMBER: SINF24259165
+Booking Ref: ONEYSINF88964
+Freight: PREPAID

@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper (Principal or Seller): APRIL FINE PAPER TRADING
+  #813, 4 EA, DUBAI AIRPORT FREE ZONE; P.O. BOX: 293775, DUBAI, UNITED ARAB EMIRATES
+Consignee: MOORIM SP CO., LTD
+  656, GANGNAM-DAERO, GANGNAM-GU; SEOUL, SOUTH KOREA; T. 82-2-3485-1500
+Notify Party: MOORIM SP CO., LTD
+POL: NANTONG, CHINA (CNNTG)
+Port of Discharge (POD): ASHDOD, ISRAEL (ILASH)
+Container Count: 6 x 20'FCL
+Gross Weight (KG): 120,474 KG
+Export Carrier (vessel, voyage): PACIFIC SUN 1 V.251073E
+Voy.: BS012
+Description: ASIA SYMBOL FOOD SERVICE BOARD (CUPSTOCK/HI-BULK) - ALLINONE
+Bill of Lading No.: SIN314281974
+Booking No.: SIN155775583
+Freight: PREPAID

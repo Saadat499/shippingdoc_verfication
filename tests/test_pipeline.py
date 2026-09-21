@@ -70,3 +70,25 @@ def test_every_email_gets_a_result():
     for e in emails[:20]:  # smoke-test a slice; CI runs the full CLI separately
         r = process_email(e, inbox.read_bytes)
         assert r.email_id == e["email_id"]
+
+
+def test_automated_notification_is_general():
+    from shipverify.classify import rule_classify
+    email = {"from": "noreply@example.com", "subject": "Test",
+             "body": "This is an automated notification. Billing process completed.\n\n-- RPA Bot",
+             "attachments": []}
+    category, decided_by = rule_classify(email)
+    assert category.value == "GENERAL"
+
+def test_si_title_recognized():
+    from shipverify.extract_rules import classify_document_title
+    assert classify_document_title("BILL OF LADING INSTRUCTION") == "SI"
+
+def test_pipe_semicolon_stripped():
+    from shipverify.normalize import normalize
+    assert normalize("shipper", "ABC | LTD") == normalize("shipper", "ABC LTD")
+
+def test_colonless_pdf_label():
+    from shipverify.extract_rules import extract_fields
+    out = extract_fields(["Shipper ABC CORP"])
+    assert out["shipper"].raw == "ABC CORP"

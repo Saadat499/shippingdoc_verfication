@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper (Principal or Seller): APRIL FINE PAPER TRADING (MIDDLE EAST) FZE
+  #813, 4 EA, DUBAI AIRPORT FREE ZONE; P.O. BOX: 293775, DUBAI, UNITED ARAB EMIRATES
+Consignee (Non-Negotiable): VITAL SOLUTIONS PTE. LTD.
+  77 ROBINSON ROAD; #21-01 ROBINSON 77; SINGAPORE 068896
+Notify Party/Intermediate Consignee: VITAL SOLUTIONS PTE. LTD.
+POL: SINGAPORE (SGSIN)
+Port of Discharge: APAPA, NIGERIA (NGAPP)
+No. of Containers or Packages: 3 x 20'FCL
+Gross Weight毛重(KGS): 62,706 KG
+Vessel Name: PACIFIC SUN 1 V.251073E
+Voy. No: 2545E
+Description of Goods: COATED IVORY BOARD
+Bill of Lading No.: YMJAI933557611
+Booking Reference: I039246315
+Freight: PREPAID

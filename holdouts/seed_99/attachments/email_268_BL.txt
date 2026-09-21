@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper: ASIA PACIFIC PAPERBOARD TRADING PTE LTD
+  80 RAFFLES PLACE, #50-01 UOB PLAZA 1; SINGAPORE 048624
+To the Order of: CERIEX
+  ZONE INDUSTRIELLE; CONAKRY, GUINEA
+Notify Party/Intermediate Consignee: TOPKOPY MIDDLE EAST FZE
+Port of Loading (POL): SINGAPORE (SGSIN)
+Port of Discharge (POD): CEBU, PHILIPPINES (PHCEB)
+No. of Containers: 10 x 40'HC
+Gross Wt (kgs): 215,140 KG
+Export Carrier (vessel, voyage): SOLID 16 V.044NW2
+Voy. No: BS291
+Description: UNCOATED WOODFREE PAPER IN REAMS
+B/L No.: SINF55454571
+BOOKING NO.: ONEYSINF23048
+Freight: PREPAID

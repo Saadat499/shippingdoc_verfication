@@ -1,0 +1,18 @@
+BILL OF LADING (DRAFT)
+========================================
+
+Shipper/Exporter: APRIL FAR EAST (M) SDN BHD
+  TOWER 2, AVENUE 5, LEVEL 6; BANGSAR SOUTH CITY, NO. 8 JALAN KERINCHI; 59200 KUALA LUMPUR, MALAYSIA
+Consignee (Non-Negotiable): KTP CO., LTD
+  KTP BLDG., 36 SANGWON-GIL; SEOUNGDONG-GU, SEOUL, SOUTH KOREA; TEL:02-2285-6025
+Notify Party/Intermediate Consignee: CLIFFORD PAPER INC
+Port of Loading: NANTONG, CHINA (IDBUA)
+PORT OF DISCHARGE: YANGON, MYANMAR (MMRGN)
+Container Count: 4 x 40'HC
+Gross Weight毛重(KGS): 90,560 KG
+Export Carrier (vessel, voyage): LE HAVRE V.QI540A
+Voyage No.: QI540A
+Kinds of Packages; Description of Goods: UNCOATED WOODFREE PAPER IN REAMS
+B/L NUMBER: EGLV295324248835
+BOOKING NO.: 070500249355
+Freight: PREPAID
