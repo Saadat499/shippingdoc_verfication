@@ -62,8 +62,10 @@ def _read_pdf(raw: bytes) -> tuple[list[str], str, bool]:
 
     if not lines:
         # No extractable text layer -> likely a scanned/image-only PDF.
-        # TODO(AI engineer): try OCR (pytesseract on a rasterized page) or
-        # Gemini vision here before giving up. For now: unreadable.
+        # Try Gemini vision before giving up entirely.
+        lines, title, ok = _read_scanned_pdf_via_gemini(raw)
+        if ok:
+            return lines, title, True
         return [], "", False
     title = lines[0]
     return lines, title, True
@@ -106,3 +108,63 @@ def _read_xlsx(raw: bytes) -> tuple[list[str], str, bool]:
         return [], "", False
     title = lines[0]
     return lines, title, True
+def _read_scanned_pdf_via_gemini(raw: bytes) -> tuple[list[str], str, bool]:
+    """
+    Called only when pdfplumber/pypdf find no extractable text at all (a
+    scanned/image-only PDF). Renders the first page as an image and asks
+    Gemini to transcribe it verbatim, then treats the transcription exactly
+    like any other document's text -- extract_fields() doesn't need to know
+    the difference.
+
+    Returns unreadable (empty, False) if no API key is set, or if the call
+    fails for any reason -- this must never crash the pipeline.
+    """
+    import io
+    import os
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return [], "", False
+
+    try:
+        import pdfplumber
+        from google import genai
+
+        with pdfplumber.open(io.BytesIO(raw)) as pdf:
+            if not pdf.pages:
+                return [], "", False
+            page_image = pdf.pages[0].to_image(resolution=200).original
+
+        buf = io.BytesIO()
+        page_image.save(buf, format="PNG")
+        image_bytes = buf.getvalue()
+
+        client = genai.Client(api_key=api_key)
+        model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+
+        response = client.models.generate_content(
+            model=model,
+            contents=[
+                "Transcribe every line of text visible in this scanned "
+                "shipping document exactly as it appears, one line per "
+                "line of the original. Do not summarize, reformat, or "
+                "add commentary -- output only the transcribed lines.",
+                {"mime_type": "image/png", "data": image_bytes},
+            ],
+        )
+
+        text = (response.text or "").strip()
+        if not text:
+            return [], "", False
+
+        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        if not lines:
+            return [], "", False
+
+        title = lines[0]
+        return lines, title, True
+
+    except Exception:
+        # Any failure (no network, bad response, corrupt render) -- fall
+        # back to unreadable rather than crash the whole pipeline run.
+        return [], "", False
