@@ -10,3 +10,5 @@ google-genai>=1.0,<2.0   # Gemini API client, used by classify.py
 # backend engineer: add fastapi, uvicorn, google-cloud-firestore,
 # google-cloud-storage, google-cloud-pubsub here as you wire each one up,
 # so `pip install -r requirements.txt` always reflects what the app needs.
+
+pypdf>=4.0,<5.0

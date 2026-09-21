@@ -1,0 +1,10 @@
+520 emails loaded from data
+wrote submission.json
+{
+  "final_score": 0.8103566194430875,
+  "stage1_macro_f1": 1.0,
+  "stage3_defect_f1": 0.9213483146067417,
+  "end_to_end_rate": 0.6521739130434783,
+  "reliability_escalation_f1": 1.0,
+  "rule_pct": 1.0
+}
