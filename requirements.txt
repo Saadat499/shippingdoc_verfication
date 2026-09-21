@@ -4,8 +4,9 @@ python-docx>=1.1,<2.0
 openpyxl>=3.1,<4.0
 pytest>=8.0,<9.0
 requests>=2.31,<3.0
+reportlab>=4.0,<5.0   # used only by generator/ to make fresh test datasets
+google-genai>=1.0,<2.0   # Gemini API client, used by classify.py
 
 # backend engineer: add fastapi, uvicorn, google-cloud-firestore,
-# google-cloud-storage, google-cloud-pubsub, google-genai here as you wire
-# each one up, so `pip install -r requirements.txt` always reflects what the
-# app actually needs.
+# google-cloud-storage, google-cloud-pubsub here as you wire each one up,
+# so `pip install -r requirements.txt` always reflects what the app needs.
