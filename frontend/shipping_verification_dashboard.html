@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NaviDoc AI - Shipping Document Verification Dashboard</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(150, 150, 150, 0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(150, 150, 150, 0.5); }
+    .highlight-active { background-color: rgba(239, 68, 68, 0.18) !important; border-left: 3px solid #ef4444; }
+    .highlight-match { background-color: rgba(16, 185, 129, 0.12) !important; border-left: 3px solid #10b981; }
+    .highlight-semantic { background-color: rgba(99, 102, 241, 0.14) !important; border-left: 3px solid #6366f1; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 antialiased font-sans min-h-screen flex flex-col">
+
+  <!-- Top App Navigation -->
+  <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-md">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-500 to-teal-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-base tracking-tight text-white flex items-center gap-2">
+            NaviDoc <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">OPS VERIFIER</span>
+          </h1>
+          <p class="text-xs text-slate-400">Automated Shipping Document Cross-Check & Inbox Triage</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center ml-8 gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+        <button onclick="switchTab('inbox')" id="nav-inbox" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-2">
+          <span>📬 Unified Inbox</span>
+          <span id="unread-badge" class="bg-indigo-400/30 text-indigo-200 text-[10px] px-1.5 py-0.2 rounded-full font-bold">6</span>
+        </button>
+        <button onclick="switchTab('studio')" id="nav-studio" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium transition-all text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2">
+          <span>🔍 Verification Studio</span>
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        </button>
+        <button onclick="switchTab('escalations')" id="nav-escalations" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium transition-all text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2">
+          <span>⚠️ Escalation Queue</span>
+          <span id="escalation-badge" class="bg-amber-500/20 text-amber-300 text-[10px] px-1.5 py-0.2 rounded-full font-bold">1</span>
+        </button>
+        <button onclick="switchTab('analytics')" id="nav-analytics" class="tab-btn px-3.5 py-1.5 rounded-md text-xs font-medium transition-all text-slate-300 hover:text-white hover:bg-slate-800/80 flex items-center gap-2">
+          <span>📊 Ops Analytics</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Quick Actions & Profile -->
+    <div class="flex items-center gap-3">
+      <div class="hidden lg:flex items-center gap-2 text-xs bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>Reference Standard: <strong class="text-white">SI is Ground Truth</strong></span>
+      </div>
+      <button onclick="resetDemoData()" title="Reset mock data to initial problem statement" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        Reset Demo
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: UNIFIED INBOX & CLASSIFICATION HUB (STEP 01)                       -->
+    <!-- ========================================================================= -->
+    <section id="view-inbox" class="flex-1 flex flex-col p-6 max-w-7xl w-full mx-auto space-y-5 overflow-y-auto">
+      
+      <!-- Stage 01 Pipeline Banner -->
+      <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950/40 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold text-sm shrink-0">
+            01
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+              Message Intake & Automated Classification Pipeline
+              <span class="text-[11px] font-normal px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Multi-class NLP Routing</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Automatically filters spam, invoices, and IT requests. Only <span class="text-indigo-300 font-medium underline decoration-indigo-500">Document Comparison requests</span> proceed to extraction and 7-field automated check.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-xs text-slate-400">Classified Today:</span>
+          <span class="text-xs font-bold text-white bg-slate-800 px-2 py-1 rounded border border-slate-700">142 Messages</span>
+          <span class="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded">100% Triaged</span>
+        </div>
+      </div>
+
+      <!-- Filter Tabs & Search Bar -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <!-- Categories Pills -->
+        <div class="flex flex-wrap items-center gap-1.5 text-xs bg-slate-950 p-1.5 rounded-xl border border-slate-800" id="filter-pills-container">
+          <button onclick="filterCategory('all')" id="filter-all" class="category-pill active px-3 py-1.5 rounded-lg font-medium transition-all bg-indigo-600 text-white">
+            All <span class="ml-1 opacity-70">(6)</span>
+          </button>
+          <button onclick="filterCategory('compare_review')" id="filter-compare_review" class="category-pill px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-900">
+            🎯 Compare / Review <span class="ml-1 px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 text-[10px]">3</span>
+          </button>
+          <button onclick="filterCategory('invoice_queries')" id="filter-invoice_queries" class="category-pill px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-900">
+            🧾 Invoices <span class="ml-1 opacity-70">(1)</span>
+          </button>
+          <button onclick="filterCategory('prepare_si')" id="filter-prepare_si" class="category-pill px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-900">
+            📝 Prepare New SI <span class="ml-1 opacity-70">(1)</span>
+          </button>
+          <button onclick="filterCategory('it_requests')" id="filter-it_requests" class="category-pill px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-900">
+            💻 IT Requests <span class="ml-1 opacity-70">(0)</span>
+          </button>
+          <button onclick="filterCategory('spam')" id="filter-spam" class="category-pill px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white hover:bg-slate-900">
+            🚫 Spam <span class="ml-1 opacity-70">(1)</span>
+          </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative w-full sm:w-64">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <input type="text" id="inbox-search" oninput="handleSearch(this.value)" placeholder="Search carrier, SI#, subject..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+        </div>
+      </div>
+
+      <!-- Email Table -->
+      <div class="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-slate-400 uppercase font-semibold tracking-wider text-[10px] border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4 w-8">#</th>
+                <th class="py-3 px-4">Classification & Category</th>
+                <th class="py-3 px-4">Sender / Carrier</th>
+                <th class="py-3 px-4">Subject & Email Snippet</th>
+                <th class="py-3 px-4">Attachments Extracted</th>
+                <th class="py-3 px-4">7-Field Status</th>
+                <th class="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="inbox-tbody" class="divide-y divide-slate-800/60 font-normal">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: DOCUMENT VERIFICATION STUDIO (STEPS 02 & 03)                       -->
+    <!-- ========================================================================= -->
+    <section id="view-studio" class="hidden flex-1 flex flex-col p-4 md:p-6 max-w-full w-full mx-auto space-y-4 overflow-hidden h-[calc(100vh-60px)]">
+      
+      <!-- Studio Header Bar -->
+      <div class="bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3">
+          <button onclick="switchTab('inbox')" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors" title="Back to Inbox">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          </button>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="studio-subject" class="font-bold text-sm text-white">Draft BL Verification Request - MSC ULYSSES</span>
+              <span id="studio-category-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Compare / Review</span>
+              <span id="studio-confidence-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300">99.2% NLP Match</span>
+            </div>
+            <p id="studio-email-meta" class="text-xs text-slate-400 mt-0.5">From: msc-docs@medlogistics.com • Received: Today 11:20 AM • Carrier: MSC</p>
+          </div>
+        </div>
+
+        <!-- Right Quick Action Bar -->
+        <div class="flex items-center gap-2.5">
+          <button onclick="openEscalationModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <span>Ask For Help / Escalate</span>
+          </button>
+          <button id="studio-action-amendment" onclick="openCarrierAmendmentModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <span>Draft Carrier Amendment</span>
+          </button>
+          <button id="studio-action-approve" onclick="approveBLDraft()" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-900/30 transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Approve BL Draft</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-PANE WORKSPACE (Left: Email info | Center: Dual Document Viewer | Right: 7-Field Comparison Table) -->
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden min-h-0">
+        
+        <!-- PANE 1: Email Metadata & Attachment Details (3 cols) -->
+        <div class="lg:col-span-3 bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col space-y-4 overflow-y-auto">
+          <div>
+            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Step 01 & 02 Intake Context</span>
+            <h3 class="text-xs font-semibold text-slate-200 mt-1">Inbound Message Record</h3>
+          </div>
+
+          <div class="bg-slate-900/90 rounded-lg p-3 border border-slate-800 space-y-2 text-xs">
+            <div>
+              <span class="text-slate-500 block text-[10px]">SUBJECT</span>
+              <p id="email-pane-subject" class="font-medium text-slate-200">Checking request: MSC ULYSSES 402W</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80">
+              <div>
+                <span class="text-slate-500 block text-[10px]">MSG TYPE</span>
+                <span class="text-indigo-400 font-semibold">Compare / Review</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block text-[10px]">PIPELINE</span>
+                <span class="text-emerald-400 font-semibold">Active Checked</span>
+              </div>
+            </div>
+            <div class="pt-1 border-t border-slate-800/80">
+              <span class="text-slate-500 block text-[10px]">EMAIL BODY EXTRACT</span>
+              <p id="email-pane-body" class="text-slate-300 text-[11px] leading-relaxed italic bg-slate-950 p-2 rounded border border-slate-800/60 mt-1">
+                "Hi Ops team, please find attached the draft Bill of Lading alongside our original Shipping Instruction for validation before final issuance. Vessel cut-off is tomorrow."
+              </p>
+            </div>
+          </div>
+
+          <!-- Attachments Section -->
+          <div>
+            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Extracted Attachments</span>
+            <div class="space-y-2 mt-2" id="attachments-list">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Semantic Alias Engine Status -->
+          <div class="mt-auto bg-indigo-950/20 border border-indigo-500/20 rounded-lg p-3 text-xs">
+            <div class="flex items-center gap-1.5 text-indigo-400 font-semibold mb-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>Semantic Alias Resolver</span>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              Automated synonym normalization active. E.g., <code class="text-indigo-300 font-mono">"Load Port"</code> mapped directly to canonical field <code class="text-indigo-300 font-mono">"Port of Loading"</code>.
+            </p>
+          </div>
+        </div>
+
+        <!-- PANE 2: Dual Synchronized Document Viewer (5 cols) -->
+        <div class="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-xl flex flex-col overflow-hidden">
+          <div class="bg-slate-900 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-200">Dual Document Inspector</span>
+              <span class="text-[10px] text-slate-400">(Hover table field to cross-highlight)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleDocViewMode()" id="toggle-view-mode-btn" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-700">
+                Split Side-by-Side
+              </button>
+            </div>
+          </div>
+
+          <!-- Dual Panes (SI on Left, Draft BL on Right) -->
+          <div class="flex-1 grid grid-cols-2 divide-x divide-slate-800 overflow-hidden text-xs">
+            <!-- Left: SI Reference Document -->
+            <div class="flex flex-col h-full overflow-hidden bg-slate-950">
+              <div class="bg-emerald-950/30 px-3 py-2 border-b border-emerald-500/20 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span class="font-bold text-emerald-300 text-xs">Shipping Instruction (SI)</span>
+                </div>
+                <span class="text-[10px] uppercase tracking-wider bg-emerald-500/20 text-emerald-300 font-semibold px-1.5 py-0.5 rounded">Ground Truth</span>
+              </div>
+              <div id="si-doc-content" class="flex-1 p-3 overflow-y-auto font-mono text-[11px] leading-relaxed text-slate-300 space-y-1 select-text">
+                <!-- Dynamically filled SI lines -->
+              </div>
+            </div>
+
+            <!-- Right: Draft Bill of Lading (BL) -->
+            <div class="flex flex-col h-full overflow-hidden bg-slate-950">
+              <div class="bg-blue-950/30 px-3 py-2 border-b border-blue-500/20 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                  <span class="font-bold text-blue-300 text-xs">Draft Bill of Lading (BL)</span>
+                </div>
+                <span class="text-[10px] uppercase tracking-wider bg-blue-500/20 text-blue-300 font-semibold px-1.5 py-0.5 rounded">Draft under check</span>
+              </div>
+              <div id="bl-doc-content" class="flex-1 p-3 overflow-y-auto font-mono text-[11px] leading-relaxed text-slate-300 space-y-1 select-text">
+                <!-- Dynamically filled Draft BL lines -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 3: Automated 7-Field Comparison Inspector (4 cols) -->
+        <div class="lg:col-span-4 bg-slate-950 border border-slate-800 rounded-xl flex flex-col overflow-hidden">
+          
+          <!-- Overall Status Banner -->
+          <div id="comparison-summary-banner" class="p-4 border-b border-slate-800 shrink-0 transition-all">
+            <!-- Dynamically populated (e.g. "No mismatch detected" or "Discrepancy Detected") -->
+          </div>
+
+          <!-- Comparison Table Title -->
+          <div class="bg-slate-900/90 px-4 py-2 border-b border-slate-800 flex items-center justify-between shrink-0">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-300">The 7 Verification Fields</span>
+            <span class="text-[10px] text-slate-500">Target: 7 / 7 Verified</span>
+          </div>
+
+          <!-- 7 Fields Table Container -->
+          <div class="flex-1 overflow-y-auto divide-y divide-slate-800/80" id="comparison-fields-container">
+            <!-- 7 Fields rendered here -->
+          </div>
+
+          <!-- Table Bottom Helper Note -->
+          <div class="p-3 bg-slate-900/60 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between shrink-0">
+            <span>Reference Document: <strong class="text-white">SI</strong></span>
+            <span class="text-slate-500">Auto-checked at: Today 11:21:04</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: ESCALATION & EXCEPTION QUEUE (STEP 04)                             -->
+    <!-- ========================================================================= -->
+    <section id="view-escalations" class="hidden flex-1 flex flex-col p-6 max-w-7xl w-full mx-auto space-y-5 overflow-y-auto">
+      <div class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-950 p-5 rounded-xl border border-amber-500/30 flex items-start justify-between">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-sm shrink-0">
+            04
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+              Human-in-the-Loop Escalation Console
+              <span class="text-[11px] font-normal px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Ask For Help Mode</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1 max-w-2xl">
+              When extraction confidence is below threshold, critical discrepancies are flagged, or attachments cannot be automatically reconciled, items are routed here with complete contextual history instead of guessing or failing silently.
+            </p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs text-slate-400 block">Pending Human Review</span>
+          <span id="escalation-counter-large" class="text-xl font-bold text-amber-400">1 Item</span>
+        </div>
+      </div>
+
+      <!-- Escalations List -->
+      <div class="space-y-3" id="escalations-list-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: OPERATIONS ANALYTICS DASHBOARD                                     -->
+    <!-- ========================================================================= -->
+    <section id="view-analytics" class="hidden flex-1 flex flex-col p-6 max-w-7xl w-full mx-auto space-y-6 overflow-y-auto">
+      <div>
+        <h2 class="text-base font-bold text-white">Shipping Operations & Document Verification Metrics</h2>
+        <p class="text-xs text-slate-400">Real-time Straight-Through Processing (STP) and Field Mismatch Analytics</p>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Inbound Emails Today</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl font-bold text-white">142</span>
+            <span class="text-xs text-emerald-400 font-semibold">+18% vs avg</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">100% categorized via Step 01 NLP</p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Document Check Requests</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl font-bold text-indigo-400">18</span>
+            <span class="text-xs text-slate-400">12.6% of Inbox</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Passed to extraction & 7-field check</p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Straight-Through Processing (STP)</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl font-bold text-emerald-400">72.2%</span>
+            <span class="text-xs text-emerald-400 font-semibold">"No mismatch"</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Zero human touch BL approval</p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Discrepancy Catch Rate</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-2xl font-bold text-rose-400">27.8%</span>
+            <span class="text-xs text-amber-400 font-semibold">5 Discrepancies</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Intercepted before final carrier issuance</p>
+        </div>
+      </div>
+
+      <!-- Charts & Tables Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Field Discrepancy Frequency Chart (7 cols) -->
+        <div class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-xl p-5 shadow-sm flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-xs font-bold text-white uppercase tracking-wider">Discrepancy Breakdown by Field (Last 30 Days)</h3>
+              <p class="text-[11px] text-slate-400">Which of the 7 core fields generate the most draft errors?</p>
+            </div>
+            <span class="text-[11px] bg-slate-800 text-slate-300 px-2 py-1 rounded">Sample: 340 drafts</span>
+          </div>
+
+          <!-- Bar Chart Visualizer -->
+          <div class="space-y-3 my-auto pt-2">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-slate-200">1. Container Count</span>
+                <span class="font-bold text-rose-400">38% (High Risk)</span>
+              </div>
+              <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-rose-500 h-2.5 rounded-full" style="width: 38%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-slate-200">2. Gross Weight (kg)</span>
+                <span class="font-bold text-amber-400">27%</span>
+              </div>
+              <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-amber-500 h-2.5 rounded-full" style="width: 27%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-slate-200">3. Port of Loading / Discharge</span>
+                <span class="font-bold text-indigo-400">16%</span>
+              </div>
+              <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-indigo-500 h-2.5 rounded-full" style="width: 16%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-slate-200">4. Consignee</span>
+                <span class="font-bold text-slate-400">11%</span>
+              </div>
+              <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-slate-600 h-2.5 rounded-full" style="width: 11%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-slate-200">5. Shipper</span>
+                <span class="font-bold text-slate-400">5%</span>
+              </div>
+              <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-slate-600 h-2.5 rounded-full" style="width: 5%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium text-slate-200">6. Notify Party</span>
+                <span class="font-bold text-slate-400">3%</span>
+              </div>
+              <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-slate-600 h-2.5 rounded-full" style="width: 3%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carrier Accuracy Leaderboard (5 cols) -->
+        <div class="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-xl p-5 shadow-sm flex flex-col">
+          <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-1">Carrier Draft Accuracy</h3>
+          <p class="text-[11px] text-slate-400 mb-4">First-pass accuracy score across shipping lines</p>
+
+          <div class="space-y-3 divide-y divide-slate-800/80">
+            <div class="flex items-center justify-between pt-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span class="text-xs font-medium text-white">Maersk Line</span>
+              </div>
+              <span class="text-xs font-mono font-bold text-emerald-400">94.2% Accurate</span>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span class="text-xs font-medium text-white">Hapag-Lloyd</span>
+              </div>
+              <span class="text-xs font-mono font-bold text-emerald-400">91.8% Accurate</span>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="text-xs font-medium text-white">MSC (Mediterranean Shipping)</span>
+              </div>
+              <span class="text-xs font-mono font-bold text-amber-400">86.4% Accurate</span>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+                <span class="text-xs font-medium text-white">CMA CGM</span>
+              </div>
+              <span class="text-xs font-mono font-bold text-rose-400">81.5% Accurate</span>
+            </div>
+          </div>
+
+          <div class="mt-auto pt-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800 text-[11px] text-slate-400">
+            💡 <strong>Insight:</strong> Container count mismatches (e.g. SI: 2 vs BL: 4) constitute 38% of errors, usually originating from booking amendment lag at the carrier desk.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 1: STEP 04 "ASK FOR HELP" ESCALATION MODAL                          -->
+  <!-- ========================================================================= -->
+  <div id="modal-escalate" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-950 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Escalate to Senior Operations</h3>
+            <p class="text-xs text-slate-400">Step 04: Human-in-the-loop triage with preserved audit context</p>
+          </div>
+        </div>
+        <button onclick="closeEscalationModal()" class="text-slate-500 hover:text-white">&times;</button>
+      </div>
+
+      <div class="bg-slate-900/90 rounded-xl p-4 border border-slate-800 space-y-2.5 text-xs">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Target Shipment:</span>
+          <span id="esc-modal-shipment" class="font-mono font-bold text-white">MSC ULYSSES 402W</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Flagged Issue:</span>
+          <span id="esc-modal-issue" class="font-bold text-rose-400">Container Count: SI lists 2 | Draft BL lists 4</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Risk Assessment:</span>
+          <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-semibold text-[10px]">CRITICAL CUSTOMS IMPACT</span>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-semibold text-slate-300">Operator Resolution Action:</label>
+        <div class="space-y-2 text-xs">
+          <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-800 bg-slate-900/50 hover:bg-slate-800 cursor-pointer">
+            <input type="radio" name="esc-action" value="si_override" checked class="text-indigo-600 focus:ring-0">
+            <span><strong>Enforce SI (Reference):</strong> Reject BL & require carrier to correct container count to 2.</span>
+          </label>
+          <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-800 bg-slate-900/50 hover:bg-slate-800 cursor-pointer">
+            <input type="radio" name="esc-action" value="bl_accept" class="text-indigo-600 focus:ring-0">
+            <span><strong>Accept Draft BL:</strong> Shipper authorized 4 containers in late booking update.</span>
+          </label>
+          <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-800 bg-slate-900/50 hover:bg-slate-800 cursor-pointer">
+            <input type="radio" name="esc-action" value="request_shipper" class="text-indigo-600 focus:ring-0">
+            <span><strong>Query Shipper:</strong> Email shipper to confirm intended container booking count.</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold text-slate-300">Internal Audit Note:</label>
+        <textarea id="esc-notes" rows="2" class="w-full mt-1 bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500" placeholder="e.g., Booking amended yesterday, waiting for revised BL draft from MSC..."></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="closeEscalationModal()" class="px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800">
+          Cancel
+        </button>
+        <button onclick="submitEscalation()" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-amber-600 hover:bg-amber-500 shadow-lg shadow-amber-900/30">
+          Confirm Escalation & Log
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 2: CARRIER AMENDMENT EMAIL DRAFTER                                   -->
+  <!-- ========================================================================= -->
+  <div id="modal-amendment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-950 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Draft Carrier Amendment Request</h3>
+            <p class="text-xs text-slate-400">Pre-generated correction notice based on SI vs Draft BL diff</p>
+          </div>
+        </div>
+        <button onclick="closeCarrierAmendmentModal()" class="text-slate-500 hover:text-white">&times;</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-400 block mb-1">To:</label>
+          <input type="text" id="amend-to" value="msc-docs@medlogistics.com" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-slate-200 text-xs">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Subject:</label>
+          <input type="text" id="amend-subject" value="URGENT: Draft BL Discrepancy Notice - MSC ULYSSES (Container Count Mismatch)" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-slate-200 text-xs font-medium">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Message Body:</label>
+          <textarea id="amend-body" rows="7" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-slate-200 font-mono text-[11px] leading-relaxed"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <span class="text-[11px] text-emerald-400 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          Formatted with exact SI reference values
+        </span>
+        <div class="flex items-center gap-2">
+          <button onclick="closeCarrierAmendmentModal()" class="px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800">
+            Cancel
+          </button>
+          <button onclick="sendCarrierAmendment()" class="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-900/40">
+            Send Amendment Notice
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 border border-slate-700 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all transform translate-y-20 opacity-0 z-50">
+    <div id="toast-icon" class="text-emerald-400"></div>
+    <div id="toast-msg">Notification</div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT LOGIC & MOCK DATA (PROBLEM STATEMENT ALIGNED)                   -->
+  <!-- ========================================================================= -->
+  <script>
+    // --- 1. MOCK DATA WITH PROBLEM STATEMENT SPECIFICS ---
+    const INITIAL_EMAILS = [
+      {
+        id: "msg-001",
+        subject: "Draft BL for checking - MSC ULYSSES 402W",
+        sender: "msc-docs@medlogistics.com",
+        carrier: "MSC",
+        receivedAt: "11:20 AM",
+        category: "compare_review",
+        confidence: 0.99,
+        categoryName: "Compare / Review",
+        snippet: "Please find attached draft BL alongside SI for verification prior to vessel cutoff.",
+        emailBody: "Dear Ops,\nPlease review the attached draft BL for MSC ULYSSES against the SI reference and confirm acceptance. Let us know immediately if any revisions are needed.",
+        attachments: [
+          { name: "SI_Ref_MSCU402W.txt", type: "SI", label: "Shipping Instruction (Reference)" },
+          { name: "Draft_BL_MEDU12984.txt", type: "BL", label: "Draft Bill of Lading" }
+        ],
+        siData: {
+          shipper: "Apex Global Logistics Pte Ltd, 10 Collyer Quay, Singapore",
+          consignee: "Nordic Retailers BV, Maasvlakte 45, Rotterdam, Netherlands",
+          notifyParty: "Same as Consignee",
+          portOfLoading: "Port of Loading: Singapore (SGSIN)",
+          portOfDischarge: "Port of Discharge: Rotterdam (NLRTM)",
+          containerCount: 2, // PROBLEM STATEMENT EXAMPLE
+          grossWeightKg: 22000,
+          rawLines: [
+            "=== SHIPPING INSTRUCTION (REFERENCE) ===",
+            "Booking Ref: MSC-BKG-992144",
+            "Shipper: Apex Global Logistics Pte Ltd, 10 Collyer Quay, Singapore",
+            "Consignee: Nordic Retailers BV, Maasvlakte 45, Rotterdam, Netherlands",
+            "Notify Party: Same as Consignee",
+            "Port of Loading: Singapore (SGSIN)",
+            "Port of Discharge: Rotterdam (NLRTM)",
+            "Containers: 2 x 40' High Cube (TGHU9821440, MSCU7721092)",
+            "Gross Weight: 22,000.00 KGS",
+            "Freight: Prepaid"
+          ]
+        },
+        blData: {
+          shipper: "Apex Global Logistics Pte Ltd, 10 Collyer Quay, Singapore",
+          consignee: "Nordic Retailers BV, Maasvlakte 45, Rotterdam, Netherlands",
+          notifyParty: "Nordic Retailers BV, Maasvlakte 45, Rotterdam, Netherlands",
+          portOfLoading: "Load Port: Singapore (SGSIN)", // SEMANTIC VARIATION
+          portOfDischarge: "Port of Discharge: Rotterdam (NLRTM)",
+          containerCount: 4, // MISMATCH EXAMPLE FROM PROBLEM STATEMENT!
+          grossWeightKg: 22000,
+          rawLines: [
+            "=== DRAFT BILL OF LADING ===",
+            "BL Number: MEDU12984-DRAFT",
+            "Shipper: Apex Global Logistics Pte Ltd, 10 Collyer Quay, Singapore",
+            "Consignee: Nordic Retailers BV, Maasvlakte 45, Rotterdam, Netherlands",
+            "Notify: Nordic Retailers BV, Maasvlakte 45, Rotterdam, Netherlands",
+            "Load Port: Singapore (SGSIN)", // Note: Load Port instead of Port of Loading
+            "Port of Discharge: Rotterdam (NLRTM)",
+            "Containers: 4 x 40' High Cube (TGHU9821440, MSCU7721092, MSCU1102931, TEMU9921004)", // MISMATCH!
+            "Gross Weight: 22,000.00 KGS",
+            "Freight: Prepaid"
+          ]
+        },
+        status: "mismatch_flagged"
+      },
+      {
+        id: "msg-002",
+        subject: "Draft BL verification: Maersk Honam 2401",
+        sender: "export.sea@maersk.com",
+        carrier: "Maersk",
+        receivedAt: "10:45 AM",
+        category: "compare_review",
+        confidence: 0.98,
+        categoryName: "Compare / Review",
+        snippet: "Attached is the Maersk draft BL and SI for voyage 2401. Please inspect all 7 fields.",
+        emailBody: "Hi team, please review attached SI and draft BL. All details should conform to customer booking instructions.",
+        attachments: [
+          { name: "SI_Maersk_2401.txt", type: "SI", label: "Shipping Instruction (Reference)" },
+          { name: "BL_Draft_MAEU99210.txt", type: "BL", label: "Draft Bill of Lading" }
+        ],
+        siData: {
+          shipper: "Yokohama Chemical Exports Inc, Yokohama, Japan",
+          consignee: "EuroChem Distribution GmbH, Hamburg, Germany",
+          notifyParty: "EuroChem Logistics Office, Hamburg",
+          portOfLoading: "Port of Loading: Yokohama (JPYOK)",
+          portOfDischarge: "Port of Discharge: Hamburg (DEHAM)",
+          containerCount: 3,
+          grossWeightKg: 45200,
+          rawLines: [
+            "=== SHIPPING INSTRUCTION (REFERENCE) ===",
+            "Booking Ref: MAEU-772109",
+            "Shipper: Yokohama Chemical Exports Inc, Yokohama, Japan",
+            "Consignee: EuroChem Distribution GmbH, Hamburg, Germany",
+            "Notify Party: EuroChem Logistics Office, Hamburg",
+            "Port of Loading: Yokohama (JPYOK)",
+            "Port of Discharge: Hamburg (DEHAM)",
+            "Containers: 3 x 20' Standard",
+            "Gross Weight: 45,200.00 KGS",
+            "Status: Final SI"
+          ]
+        },
+        blData: {
+          shipper: "Yokohama Chemical Exports Inc, Yokohama, Japan",
+          consignee: "EuroChem Distribution GmbH, Hamburg, Germany",
+          notifyParty: "EuroChem Logistics Office, Hamburg",
+          portOfLoading: "Load Port: Yokohama (JPYOK)", // Semantic match
+          portOfDischarge: "Port of Discharge: Hamburg (DEHAM)",
+          containerCount: 3,
+          grossWeightKg: 45200,
+          rawLines: [
+            "=== DRAFT BILL OF LADING ===",
+            "Draft B/L: MAEU99210-DRAFT",
+            "Shipper: Yokohama Chemical Exports Inc, Yokohama, Japan",
+            "Consignee: EuroChem Distribution GmbH, Hamburg, Germany",
+            "Notify: EuroChem Logistics Office, Hamburg",
+            "Load Port: Yokohama (JPYOK)",
+            "Port of Discharge: Hamburg (DEHAM)",
+            "Containers: 3 x 20' Standard",
+            "Gross Weight: 45,200.00 KGS",
+            "Clean on Board"
+          ]
+        },
+        status: "verified_match" // PERFECT MATCH!
+      },
+      {
+        id: "msg-003",
+        subject: "Review requested: CMA CGM TIVOLI - Heavy Machinery",
+        sender: "doc.asia@cma-cgm.com",
+        carrier: "CMA CGM",
+        receivedAt: "09:15 AM",
+        category: "compare_review",
+        confidence: 0.94,
+        categoryName: "Compare / Review",
+        snippet: "Draft BL and SI for heavy equipment shipment attached. Weight tolerance query.",
+        emailBody: "Draft attached. Note: gross weight in BL includes tare weight calculation. Please check.",
+        attachments: [
+          { name: "SI_CMA_Tivoli.txt", type: "SI", label: "Shipping Instruction (Reference)" },
+          { name: "BL_Draft_CMA9011.txt", type: "BL", label: "Draft Bill of Lading" }
+        ],
+        siData: {
+          shipper: "Bavaria Machinery Works AG, Munich",
+          consignee: "Shanghai Heavy Industries Co, Shanghai",
+          notifyParty: "Shanghai Freight Forwarding Ltd",
+          portOfLoading: "Port of Loading: Antwerp (BEANR)",
+          portOfDischarge: "Port of Discharge: Shanghai (CNSHA)",
+          containerCount: 1,
+          grossWeightKg: 18500,
+          rawLines: [
+            "=== SHIPPING INSTRUCTION ===",
+            "Shipper: Bavaria Machinery Works AG, Munich",
+            "Consignee: Shanghai Heavy Industries Co, Shanghai",
+            "Notify: Shanghai Freight Forwarding Ltd",
+            "Port of Loading: Antwerp (BEANR)",
+            "Port of Discharge: Shanghai (CNSHA)",
+            "Container Count: 1 x 40' Flat Rack",
+            "Gross Weight: 18,500 KGS"
+          ]
+        },
+        blData: {
+          shipper: "Bavaria Machinery Works AG, Munich",
+          consignee: "Shanghai Heavy Industries Co, Shanghai",
+          notifyParty: "Shanghai Freight Forwarding Ltd",
+          portOfLoading: "Load Port: Antwerp (BEANR)",
+          portOfDischarge: "Port of Discharge: Shanghai (CNSHA)",
+          containerCount: 1,
+          grossWeightKg: 21900, // WEIGHT MISMATCH
+          rawLines: [
+            "=== DRAFT BILL OF LADING ===",
+            "Shipper: Bavaria Machinery Works AG, Munich",
+            "Consignee: Shanghai Heavy Industries Co, Shanghai",
+            "Notify: Shanghai Freight Forwarding Ltd",
+            "Load Port: Antwerp (BEANR)",
+            "Port of Discharge: Shanghai (CNSHA)",
+            "Container Count: 1 x 40' Flat Rack",
+            "Gross Weight: 21,900 KGS" // 21,900 vs 18,500!
+          ]
+        },
+        status: "escalated" // ESCALATED FOR HUMAN CHECK
+      },
+      {
+        id: "msg-004",
+        subject: "Invoice Dispute: Demurrage charges on MEDU882103",
+        sender: "accounts@nordictrade.com",
+        carrier: "Nordic Trade",
+        receivedAt: "08:50 AM",
+        category: "invoice_queries",
+        confidence: 0.97,
+        categoryName: "Invoice Queries",
+        snippet: "We were charged demurrage fees at Rotterdam terminal despite container being returned on time...",
+        emailBody: "Dear Finance, regarding invoice INV-2026-9812, we dispute the 3-day detention fee...",
+        attachments: [{ name: "Disputed_Invoice_9812.pdf", type: "INV", label: "Invoice" }],
+        status: "routed_finance"
+      },
+      {
+        id: "msg-005",
+        subject: "Instructions to prepare new SI for booking HLCU881023",
+        sender: "ops@shippers-union.org",
+        carrier: "Hapag-Lloyd",
+        receivedAt: "08:30 AM",
+        category: "prepare_si",
+        confidence: 0.95,
+        categoryName: "Prepare New SI",
+        snippet: "Please prepare and submit a new Shipping Instruction for 5x40HC to Genoa before 5 PM today.",
+        emailBody: "Hi, please create the SI draft using the attached commercial invoice and packing list.",
+        attachments: [{ name: "Packing_List_Genoa.xlsx", type: "DOC", label: "Packing List" }],
+        status: "routed_si_desk"
+      },
+      {
+        id: "msg-006",
+        subject: "Exclusive Offer: Discounted ocean freight rates Q4",
+        sender: "promo@globalfreight-leads.xyz",
+        carrier: "External",
+        receivedAt: "07:15 AM",
+        category: "spam",
+        confidence: 0.99,
+        categoryName: "Spam",
+        snippet: "Increase your margins! Click here to view bulk container slots at 40% discount.",
+        emailBody: "Click to claim your freight discount today...",
+        attachments: [],
+        status: "quarantined"
+      }
+    ];
+
+    let emails = JSON.parse(JSON.stringify(INITIAL_EMAILS));
+    let activeEmailId = "msg-001";
+    let activeFilter = "all";
+
+    // --- 2. THE 7 MANDATORY FIELDS COMPARISON ENGINE ---
+    function compareSevenFields(email) {
+      if (!email.siData || !email.blData) return null;
+
+      const si = email.siData;
+      const bl = email.blData;
+
+      // 1. Shipper
+      const shipperMatch = si.shipper.trim().toLowerCase() === bl.shipper.trim().toLowerCase();
+
+      // 2. Consignee
+      const consigneeMatch = si.consignee.trim().toLowerCase() === bl.consignee.trim().toLowerCase();
+
+      // 3. Notify Party (normalizing "Same as Consignee")
+      let notifyMatch = false;
+      if (si.notifyParty.toLowerCase().includes("same as consignee")) {
+        notifyMatch = bl.notifyParty.toLowerCase().includes(si.consignee.split(',')[0].toLowerCase().trim());
+      } else {
+        notifyMatch = si.notifyParty.trim().toLowerCase() === bl.notifyParty.trim().toLowerCase();
+      }
+
+      // 4. Port of Loading (Semantic Alias Normalization: "Port of Loading" <-> "Load Port")
+      const polExtractSI = si.portOfLoading.replace(/Port of Loading:|Load Port:/i, '').trim();
+      const polExtractBL = bl.portOfLoading.replace(/Port of Loading:|Load Port:/i, '').trim();
+      const polMatch = polExtractSI.toLowerCase() === polExtractBL.toLowerCase();
+
+      // 5. Port of Discharge
+      const podExtractSI = si.portOfDischarge.replace(/Port of Discharge:|Discharge Port:/i, '').trim();
+      const podExtractBL = bl.portOfDischarge.replace(/Port of Discharge:|Discharge Port:/i, '').trim();
+      const podMatch = podExtractSI.toLowerCase() === podExtractBL.toLowerCase();
+
+      // 6. Container Count (The Problem Statement Test Case: SI: 2 vs BL: 4)
+      const containerMatch = Number(si.containerCount) === Number(bl.containerCount);
+
+      // 7. Gross Weight (kg)
+      const weightMatch = Math.abs(Number(si.grossWeightKg) - Number(bl.grossWeightKg)) < 1;
+
+      const fields = [
+        {
+          key: "shipper",
+          label: "1. Shipper",
+          siVal: si.shipper,
+          blVal: bl.shipper,
+          match: shipperMatch,
+          type: "exact",
+          detail: shipperMatch ? "Exact entity match" : `SI: ${si.shipper} | BL: ${bl.shipper}`
+        },
+        {
+          key: "consignee",
+          label: "2. Consignee",
+          siVal: si.consignee,
+          blVal: bl.consignee,
+          match: consigneeMatch,
+          type: "exact",
+          detail: consigneeMatch ? "Exact entity match" : `SI: ${si.consignee} | BL: ${bl.consignee}`
+        },
+        {
+          key: "notifyParty",
+          label: "3. Notify Party",
+          siVal: si.notifyParty,
+          blVal: bl.notifyParty,
+          match: notifyMatch,
+          type: si.notifyParty.toLowerCase().includes("same as") ? "semantic" : "exact",
+          detail: notifyMatch ? "Semantic resolution verified" : `SI: ${si.notifyParty} | BL: ${bl.notifyParty}`
+        },
+        {
+          key: "portOfLoading",
+          label: "4. Port of Loading (POL)",
+          siVal: si.portOfLoading,
+          blVal: bl.portOfLoading,
+          match: polMatch,
+          type: "semantic",
+          semanticNote: "'Load Port' normalized to 'Port of Loading'",
+          detail: polMatch ? "Port & UN/LOCODE agreed" : `SI: ${si.portOfLoading} | BL: ${bl.portOfLoading}`
+        },
+        {
+          key: "portOfDischarge",
+          label: "5. Port of Discharge (POD)",
+          siVal: si.portOfDischarge,
+          blVal: bl.portOfDischarge,
+          match: podMatch,
+          type: "exact",
+          detail: podMatch ? "Port & UN/LOCODE agreed" : `SI: ${si.portOfDischarge} | BL: ${bl.portOfDischarge}`
+        },
+        {
+          key: "containerCount",
+          label: "6. Container Count",
+          siVal: `${si.containerCount} Containers`,
+          blVal: `${bl.containerCount} Containers`,
+          match: containerMatch,
+          type: "numeric",
+          // Exactly as in problem statement: "flag only the container count and show SI: 2 | BL: 4."
+          detail: containerMatch ? "Quantities match exactly" : `SI: ${si.containerCount} | BL: ${bl.containerCount}`
+        },
+        {
+          key: "grossWeightKg",
+          label: "7. Gross Weight (kg)",
+          siVal: `${Number(si.grossWeightKg).toLocaleString()} kg`,
+          blVal: `${Number(bl.grossWeightKg).toLocaleString()} kg`,
+          match: weightMatch,
+          type: "numeric",
+          detail: weightMatch ? "Weight verified in kilograms" : `SI: ${si.grossWeightKg} kg | BL: ${bl.grossWeightKg} kg`
+        }
+      ];
+
+      const allMatched = fields.every(f => f.match);
+      const mismatchCount = fields.filter(f => !f.match).length;
+
+      return {
+        allMatched,
+        mismatchCount,
+        reportMessage: allMatched ? "No mismatch detected" : `${mismatchCount} Discrepancy Found (Requires Attention)`,
+        fields
+      };
+    }
+
+    // --- 3. RENDER FUNCTIONS ---
+    function renderInbox() {
+      const tbody = document.getElementById('inbox-tbody');
+      tbody.innerHTML = '';
+
+      const filtered = emails.filter(e => {
+        if (activeFilter === 'all') return true;
+        return e.category === activeFilter;
+      });
+
+      filtered.forEach((email, idx) => {
+        const comp = email.category === 'compare_review' ? compareSevenFields(email) : null;
+        const tr = document.createElement('tr');
+        tr.className = `hover:bg-slate-900/90 transition-colors cursor-pointer ${email.id === activeEmailId ? 'bg-slate-900/60 border-l-2 border-indigo-500' : ''}`;
+        tr.onclick = (ev) => {
+          if (ev.target.tagName !== 'BUTTON') {
+            selectEmailAndOpen(email.id);
+          }
+        };
+
+        // Category Tag Colors
+        let catBadge = '';
+        if (email.category === 'compare_review') {
+          catBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Compare / Review
+          </span>`;
+        } else if (email.category === 'invoice_queries') {
+          catBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">🧾 Invoice Query</span>`;
+        } else if (email.category === 'prepare_si') {
+          catBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-teal-500/10 text-teal-400 border border-teal-500/20">📝 Prepare New SI</span>`;
+        } else if (email.category === 'spam') {
+          catBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-700/40 text-slate-400 border border-slate-700">🚫 Spam</span>`;
+        } else {
+          catBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300">${email.categoryName}</span>`;
+        }
+
+        // Status Badge
+        let statusBadge = '';
+        if (email.category !== 'compare_review') {
+          statusBadge = `<span class="text-slate-500 text-[11px] italic">Bypassed (Non-doc request)</span>`;
+        } else if (email.status === 'escalated') {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">⚠️ In Escalation Queue</span>`;
+        } else if (comp && comp.allMatched) {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✓ No mismatch detected</span>`;
+        } else {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">✕ Discrepancy Flagged</span>`;
+        }
+
+        // Attachments pill
+        const attCount = email.attachments.length;
+        const attPill = attCount > 0 
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px]"><svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>${attCount} doc${attCount>1?'s':''}</span>`
+          : `<span class="text-slate-600 text-[11px]">None</span>`;
+
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 font-mono text-slate-500">${idx + 1}</td>
+          <td class="py-3.5 px-4">
+            <div class="flex flex-col gap-1 items-start">
+              ${catBadge}
+              <span class="text-[10px] text-slate-400 font-mono">${(email.confidence * 100).toFixed(1)}% confidence</span>
+            </div>
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="font-semibold text-white block">${email.carrier}</span>
+            <span class="text-[11px] text-slate-400 font-mono">${email.sender}</span>
+          </td>
+          <td class="py-3.5 px-4 max-w-xs">
+            <span class="font-medium text-slate-200 block truncate">${email.subject}</span>
+            <span class="text-[11px] text-slate-400 truncate block">${email.snippet}</span>
+          </td>
+          <td class="py-3.5 px-4">${attPill}</td>
+          <td class="py-3.5 px-4">${statusBadge}</td>
+          <td class="py-3.5 px-4 text-right">
+            ${email.category === 'compare_review' ? `
+              <button onclick="selectEmailAndOpen('${email.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-medium transition-colors shadow-sm">
+                Open Studio &rarr;
+              </button>
+            ` : `
+              <span class="text-slate-500 text-[11px]">Auto-Routed</span>
+            `}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderStudio() {
+      const email = emails.find(e => e.id === activeEmailId) || emails[0];
+      if (!email || !email.siData) return;
+
+      const comp = compareSevenFields(email);
+
+      // Studio Header
+      document.getElementById('studio-subject').innerText = email.subject;
+      document.getElementById('studio-email-meta').innerText = `From: ${email.sender} • Received: ${email.receivedAt} • Carrier: ${email.carrier}`;
+      document.getElementById('email-pane-subject').innerText = email.subject;
+      document.getElementById('email-pane-body').innerText = `"${email.emailBody}"`;
+
+      // Attachments list
+      const attList = document.getElementById('attachments-list');
+      attList.innerHTML = '';
+      email.attachments.forEach(att => {
+        const div = document.createElement('div');
+        div.className = `p-2 rounded-lg border text-xs flex items-center justify-between ${att.type === 'SI' ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300' : 'bg-blue-950/20 border-blue-500/30 text-blue-300'}`;
+        div.innerHTML = `
+          <div class="flex items-center gap-2 truncate">
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${att.type === 'SI' ? 'bg-emerald-500/20' : 'bg-blue-500/20'}">${att.type}</span>
+            <span class="font-mono text-[11px] truncate">${att.name}</span>
+          </div>
+          <span class="text-[10px] text-slate-400 shrink-0">${att.type === 'SI' ? 'Ref Document' : 'Target Draft'}</span>
+        `;
+        attList.appendChild(div);
+      });
+
+      // Render SI lines
+      const siContainer = document.getElementById('si-doc-content');
+      siContainer.innerHTML = '';
+      email.siData.rawLines.forEach((line, idx) => {
+        const p = document.createElement('div');
+        p.id = `si-line-${idx}`;
+        p.className = 'py-0.5 px-1.5 rounded transition-all';
+        p.innerText = line;
+        siContainer.appendChild(p);
+      });
+
+      // Render Draft BL lines
+      const blContainer = document.getElementById('bl-doc-content');
+      blContainer.innerHTML = '';
+      email.blData.rawLines.forEach((line, idx) => {
+        const p = document.createElement('div');
+        p.id = `bl-line-${idx}`;
+        p.className = 'py-0.5 px-1.5 rounded transition-all';
+        p.innerText = line;
+        blContainer.appendChild(p);
+      });
+
+      // Summary Banner (Problem Statement requirement: "If all seven fields match, report 'No mismatch detected'.")
+      const banner = document.getElementById('comparison-summary-banner');
+      const approveBtn = document.getElementById('studio-action-approve');
+      const amendBtn = document.getElementById('studio-action-amendment');
+
+      if (comp.allMatched) {
+        banner.className = 'p-4 bg-emerald-950/40 border-b border-emerald-500/30';
+        banner.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-emerald-300">No mismatch detected</h3>
+              <p class="text-xs text-emerald-400/80">All 7 fields in agreement with SI reference. Ready for immediate sign-off.</p>
+            </div>
+          </div>
+        `;
+        approveBtn.classList.remove('opacity-50', 'pointer-events-none');
+        amendBtn.classList.add('hidden');
+      } else {
+        banner.className = 'p-4 bg-rose-950/40 border-b border-rose-500/30';
+        banner.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center shrink-0 font-bold text-base">
+              !
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-rose-300">${comp.mismatchCount} Mismatch Detected</h3>
+              <p class="text-xs text-rose-400/80">Discrepancies found against SI reference. Draft BL must be amended before cutoff.</p>
+            </div>
+          </div>
+        `;
+        approveBtn.classList.add('opacity-50', 'pointer-events-none');
+        amendBtn.classList.remove('hidden');
+      }
+
+      // Render 7 Fields
+      const fieldsContainer = document.getElementById('comparison-fields-container');
+      fieldsContainer.innerHTML = '';
+
+      comp.fields.forEach(f => {
+        const item = document.createElement('div');
+        item.className = `p-3.5 transition-colors cursor-pointer ${f.match ? 'hover:bg-slate-900/70' : 'bg-rose-950/20 hover:bg-rose-950/30 border-l-4 border-rose-500'}`;
+        
+        // Hover highlight effect
+        item.onmouseenter = () => highlightFieldsInDocs(f.key, f.match);
+        item.onmouseleave = () => clearDocHighlights();
+
+        let statusChip = '';
+        if (f.match) {
+          if (f.type === 'semantic') {
+            statusChip = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Semantic Match</span>`;
+          } else {
+            statusChip = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✓ Match</span>`;
+          }
+        } else {
+          statusChip = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">✕ MISMATCH</span>`;
+        }
+
+        item.innerHTML = `
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="font-bold text-xs ${f.match ? 'text-slate-200' : 'text-rose-300'}">${f.label}</span>
+            ${statusChip}
+          </div>
+          
+          <div class="space-y-1 text-xs font-mono">
+            <div class="flex items-start justify-between bg-slate-900/70 p-1.5 rounded">
+              <span class="text-slate-400 text-[10px] shrink-0 w-16">SI (Ref):</span>
+              <span class="text-emerald-300 text-right font-medium truncate">${f.siVal}</span>
+            </div>
+            <div class="flex items-start justify-between bg-slate-900/70 p-1.5 rounded">
+              <span class="text-slate-400 text-[10px] shrink-0 w-16">BL (Draft):</span>
+              <span class="${f.match ? 'text-blue-300' : 'text-rose-400 font-bold'} text-right truncate">${f.blVal}</span>
+            </div>
+          </div>
+
+          ${!f.match ? `
+            <div class="mt-2 text-[11px] font-mono bg-rose-900/30 text-rose-200 p-1.5 rounded border border-rose-500/30 flex items-center justify-between">
+              <span>Attention:</span>
+              <strong class="font-bold">${f.detail}</strong>
+            </div>
+          ` : (f.semanticNote ? `
+            <div class="mt-1.5 text-[10px] text-indigo-400 flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span>${f.semanticNote}</span>
+            </div>
+          ` : '')}
+        `;
+        fieldsContainer.appendChild(item);
+      });
+    }
+
+    function renderEscalations() {
+      const container = document.getElementById('escalations-list-container');
+      container.innerHTML = '';
+
+      const escalatedList = emails.filter(e => e.status === 'escalated' || e.status === 'mismatch_flagged');
+      document.getElementById('escalation-badge').innerText = escalatedList.length;
+      document.getElementById('escalation-counter-large').innerText = `${escalatedList.length} Items`;
+
+      if (escalatedList.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 bg-slate-950 rounded-xl border border-slate-800 text-slate-400">
+            <svg class="w-12 h-12 mx-auto text-emerald-500/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <p class="font-medium text-sm text-slate-200">No Pending Escalations</p>
+            <p class="text-xs text-slate-500">All document comparison discrepancies resolved.</p>
+          </div>
+        `;
+        return;
+      }
+
+      escalatedList.forEach(email => {
+        const comp = compareSevenFields(email);
+        const card = document.createElement('div');
+        card.className = 'bg-slate-950 border border-slate-800 hover:border-amber-500/40 rounded-xl p-5 shadow-sm space-y-3 transition-colors';
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="w-3 h-3 rounded-full ${email.status==='escalated'?'bg-amber-400':'bg-rose-500'} animate-pulse"></span>
+              <h3 class="font-bold text-sm text-white">${email.subject}</h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 font-mono">${email.carrier}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400">Priority: <strong class="text-rose-400">Urgent SLA</strong></span>
+              <span class="text-xs text-slate-500">| Received ${email.receivedAt}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+              <span class="text-slate-500 block text-[10px]">REASON FOR ESCALATION</span>
+              <p class="font-semibold text-rose-300 mt-1">
+                ${comp && comp.mismatchCount > 0 ? `${comp.mismatchCount} field mismatch (${comp.fields.filter(f=>!f.match).map(f=>f.label).join(', ')})` : 'Low OCR confidence / weight variance'}
+              </p>
+            </div>
+            <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+              <span class="text-slate-500 block text-[10px]">SOURCE OF TRUTH (SI)</span>
+              <p class="font-mono text-emerald-400 mt-1">
+                ${comp && comp.fields.find(f=>!f.match) ? comp.fields.find(f=>!f.match).siVal : 'SI Attached'}
+              </p>
+            </div>
+            <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+              <span class="text-slate-500 block text-[10px]">CARRIER DRAFT (BL)</span>
+              <p class="font-mono text-rose-400 mt-1 font-bold">
+                ${comp && comp.fields.find(f=>!f.match) ? comp.fields.find(f=>!f.match).blVal : 'BL Attached'}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2">
+            <div class="text-[11px] text-slate-400">
+              Assigned: <span class="text-slate-200">Senior Ops Desk</span> • Status: <span class="text-amber-400 font-medium">Awaiting Decision</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="selectEmailAndOpen('${email.id}')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700">
+                View in Studio
+              </button>
+              <button onclick="resolveEscalationItem('${email.id}', 'enforce_si')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm">
+                Enforce SI & Send Notice
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- 4. INTERACTION HELPERS ---
+    function switchTab(tabId) {
+      ['inbox', 'studio', 'escalations', 'analytics'].forEach(tab => {
+        const view = document.getElementById(`view-${tab}`);
+        const nav = document.getElementById(`nav-${tab}`);
+        if (tab === tabId) {
+          view.classList.remove('hidden');
+          nav.classList.add('bg-indigo-600', 'text-white');
+          nav.classList.remove('text-slate-300');
+        } else {
+          view.classList.add('hidden');
+          nav.classList.remove('bg-indigo-600', 'text-white');
+          nav.classList.add('text-slate-300');
+        }
+      });
+
+      if (tabId === 'studio') renderStudio();
+      if (tabId === 'escalations') renderEscalations();
+      if (tabId === 'inbox') renderInbox();
+    }
+
+    function selectEmailAndOpen(id) {
+      activeEmailId = id;
+      renderStudio();
+      switchTab('studio');
+      showToast("Opened shipment in Verification Studio", "info");
+    }
+
+    function filterCategory(cat) {
+      activeFilter = cat;
+      document.querySelectorAll('.category-pill').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('text-slate-400');
+      });
+      document.getElementById(`filter-${cat}`).classList.add('bg-indigo-600', 'text-white');
+      document.getElementById(`filter-${cat}`).classList.remove('text-slate-400');
+      renderInbox();
+    }
+
+    function handleSearch(query) {
+      const q = query.toLowerCase();
+      const rows = document.querySelectorAll('#inbox-tbody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    function highlightFieldsInDocs(key, isMatch) {
+      clearDocHighlights();
+      const siContainer = document.getElementById('si-doc-content');
+      const blContainer = document.getElementById('bl-doc-content');
+      
+      const searchTerms = {
+        shipper: ["shipper"],
+        consignee: ["consignee"],
+        notifyParty: ["notify"],
+        portOfLoading: ["loading", "load port"],
+        portOfDischarge: ["discharge"],
+        containerCount: ["container"],
+        grossWeightKg: ["weight", "gross"]
+      };
+
+      const terms = searchTerms[key] || [];
+
+      // Highlight matching lines in SI
+      Array.from(siContainer.children).forEach(el => {
+        if (terms.some(t => el.innerText.toLowerCase().includes(t))) {
+          el.className = isMatch ? 'py-0.5 px-1.5 rounded transition-all highlight-match' : 'py-0.5 px-1.5 rounded transition-all highlight-active';
+        }
+      });
+
+      // Highlight matching lines in Draft BL
+      Array.from(blContainer.children).forEach(el => {
+        if (terms.some(t => el.innerText.toLowerCase().includes(t))) {
+          el.className = isMatch ? 'py-0.5 px-1.5 rounded transition-all highlight-match' : 'py-0.5 px-1.5 rounded transition-all highlight-active';
+        }
+      });
+    }
+
+    function clearDocHighlights() {
+      const siContainer = document.getElementById('si-doc-content');
+      const blContainer = document.getElementById('bl-doc-content');
+      if (siContainer) {
+        Array.from(siContainer.children).forEach(el => el.className = 'py-0.5 px-1.5 rounded transition-all');
+      }
+      if (blContainer) {
+        Array.from(blContainer.children).forEach(el => el.className = 'py-0.5 px-1.5 rounded transition-all');
+      }
+    }
+
+    function toggleDocViewMode() {
+      const btn = document.getElementById('toggle-view-mode-btn');
+      showToast("View mode toggled", "info");
+    }
+
+    // Modal Operations
+    function openEscalationModal() {
+      const email = emails.find(e => e.id === activeEmailId);
+      if (!email) return;
+      const comp = compareSevenFields(email);
+
+      document.getElementById('esc-modal-shipment').innerText = email.subject;
+      if (comp && !comp.allMatched) {
+        const mismatches = comp.fields.filter(f => !f.match).map(f => `${f.label}: ${f.detail}`).join(', ');
+        document.getElementById('esc-modal-issue').innerText = mismatches;
+      } else {
+        document.getElementById('esc-modal-issue').innerText = "Manual supervisor escalation requested";
+      }
+
+      document.getElementById('modal-escalate').classList.remove('hidden');
+    }
+
+    function closeEscalationModal() {
+      document.getElementById('modal-escalate').classList.add('hidden');
+    }
+
+    function submitEscalation() {
+      const email = emails.find(e => e.id === activeEmailId);
+      if (email) {
+        email.status = "escalated";
+      }
+      closeEscalationModal();
+      renderEscalations();
+      renderInbox();
+      renderStudio();
+      showToast("Case escalated to Senior Ops queue with audit log", "success");
+      switchTab('escalations');
+    }
+
+    function resolveEscalationItem(id, resolution) {
+      const email = emails.find(e => e.id === id);
+      if (email) {
+        email.status = "verified_match";
+        if (email.blData && email.siData) {
+          // Align container count as resolved
+          email.blData.containerCount = email.siData.containerCount;
+          email.blData.grossWeightKg = email.siData.grossWeightKg;
+        }
+      }
+      renderEscalations();
+      renderInbox();
+      renderStudio();
+      showToast("Discrepancy resolved: SI values enforced and logged", "success");
+    }
+
+    function openCarrierAmendmentModal() {
+      const email = emails.find(e => e.id === activeEmailId);
+      if (!email || !email.blData) return;
+      const comp = compareSevenFields(email);
+
+      document.getElementById('amend-to').value = email.sender;
+      document.getElementById('amend-subject').value = `URGENT: Draft BL Discrepancy Notice - ${email.carrier} (${email.subject})`;
+
+      let discrepancyText = "";
+      if (comp && !comp.allMatched) {
+        comp.fields.filter(f => !f.match).forEach(f => {
+          discrepancyText += `* Field: ${f.label}\n  - Required (SI Reference): ${f.siVal}\n  - Received on Draft BL: ${f.blVal}\n  - Discrepancy: ${f.detail}\n\n`;
+        });
+      }
+
+      const bodyText = `Dear ${email.carrier} Documentation Team,\n\nWe have performed automated cross-verification of your Draft BL against our Reference Shipping Instruction (SI).\n\nPlease amend the following fields to match the SI before final issuance:\n\n${discrepancyText}Please send revised draft as soon as possible to avoid cut-off delays.\n\nBest regards,\nShipping Operations Desk`;
+
+      document.getElementById('amend-body').value = bodyText;
+      document.getElementById('modal-amendment').classList.remove('hidden');
+    }
+
+    function closeCarrierAmendmentModal() {
+      document.getElementById('modal-amendment').classList.add('hidden');
+    }
+
+    function sendCarrierAmendment() {
+      closeCarrierAmendmentModal();
+      showToast("Amendment request sent to carrier documentation desk!", "success");
+    }
+
+    function approveBLDraft() {
+      showToast("✓ Draft BL Approved! Confirmation sent to carrier.", "success");
+    }
+
+    function resetDemoData() {
+      emails = JSON.parse(JSON.stringify(INITIAL_EMAILS));
+      activeEmailId = "msg-001";
+      renderInbox();
+      renderStudio();
+      renderEscalations();
+      switchTab('studio');
+      showToast("Demo data reset to problem statement baseline", "info");
+    }
+
+    function showToast(msg, type = "info") {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.innerText = msg;
+      if (type === "success") {
+        toastIcon.innerHTML = `<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+      } else {
+        toastIcon.innerHTML = `<svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    // Keyboard Shortcuts (Linear / Pro style)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === '1') switchTab('inbox');
+      if (e.key === '2') switchTab('studio');
+      if (e.key === '3') switchTab('escalations');
+      if (e.key === '4') switchTab('analytics');
+      if (e.key === 'e' || e.key === 'E') openEscalationModal();
+      if (e.key === 'c' || e.key === 'C') openCarrierAmendmentModal();
+    });
+
+    // Initialize on load
+    renderInbox();
+    renderStudio();
+    renderEscalations();
+  </script>
+</body>
+</html>
