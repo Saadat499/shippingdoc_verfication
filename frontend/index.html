@@ -20,6 +20,7 @@
     --ok: #3FB88A;
     --mismatch: #D9503A;
     --review: #D9A23B;
+    --accent: #4C9FE8;
   }
   * { box-sizing: border-box; }
   body {
@@ -52,9 +53,10 @@
     cursor: pointer;
     border-left: 2px solid transparent;
     font-size: 13px;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   }
   .nav-item:hover { color: var(--text); }
-  .nav-item.active { color: var(--text); border-left-color: var(--ok); background: var(--panel-2); }
+  .nav-item.active { color: var(--text); border-left-color: var(--accent); background: var(--panel-2); }
 
   .main { flex: 1; padding: 28px 36px; max-width: 1100px; }
   h2 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
@@ -80,7 +82,11 @@
     border-bottom: 1px solid var(--line);
   }
   td { padding: 9px 10px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  tr.row { transition: background 0.12s ease; }
   tr.row:hover { background: var(--panel-2); cursor: pointer; }
+
+  .cat-tag { display: inline-flex; align-items: center; gap: 7px; }
+  .cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
   .badge { display: inline-block; padding: 2px 8px; font-size: 12px; border: 1px solid; }
   .badge.OK { color: var(--ok); border-color: var(--ok); }
@@ -114,9 +120,12 @@
     cursor: pointer;
     font-family: inherit;
   }
-  .btn:hover { border-color: var(--ok); }
+  .btn { transition: border-color 0.15s ease, opacity 0.15s ease; }
+  .btn:hover { border-color: var(--accent); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn:disabled:hover { border-color: var(--line); }
   .btn.primary { background: var(--ok); color: #08110D; border-color: var(--ok); font-weight: 500; }
-  .btn.primary:hover { opacity: 0.9; }
+  .btn.primary:hover { opacity: 0.9; border-color: var(--ok); }
 
   .radio-group { display: flex; gap: 16px; margin: 12px 0; }
   .radio-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; }
@@ -128,6 +137,12 @@
   .back-link { color: var(--text-dim); cursor: pointer; font-size: 13px; margin-bottom: 16px; display: inline-block; }
   .back-link:hover { color: var(--text); }
   .reviewed-note { border-left: 2px solid var(--ok); padding: 10px 14px; background: var(--panel-2); font-size: 13px; margin-bottom: 16px; }
+
+  .state-message { padding: 80px 20px; text-align: center; color: var(--text-dim); font-size: 14px; }
+  .state-message.error { color: var(--mismatch); }
+
+  .case-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .case-nav-btns { display: flex; gap: 8px; }
 </style>
 </head>
 <body>
@@ -144,6 +159,23 @@ const USING_FIREBASE = !FIREBASE_DB_URL.includes("YOUR-PROJECT");
 
 const FIELDS = ["shipper", "consignee", "notify_party", "port_of_loading",
                 "port_of_discharge", "container_count", "gross_weight_kg"];
+
+const CATEGORY_COLORS = {
+  BL_COMPARISON: "#5B8DBD",
+  SI_REQUEST: "#4FAE9E",
+  INVOICE_QUERY: "#C9A24B",
+  GENERAL: "#7A8790",
+  SPAM: "#B15C52",
+};
+
+function CategoryTag({ category }) {
+  return (
+    <span className="cat-tag">
+      <span className="cat-dot" style={{background: CATEGORY_COLORS[category] || "#7A8790"}}></span>
+      {category}
+    </span>
+  );
+}
 
 async function loadOverrides() {
   if (!USING_FIREBASE) {
@@ -241,6 +273,7 @@ function Home({ data, overrides }) {
 function Inbox({ data, overrides, openCase }) {
   const [catFilter, setCatFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
 
   const rows = Object.entries(data).map(([id, d]) => ({
     id,
@@ -254,9 +287,11 @@ function Inbox({ data, overrides, openCase }) {
   const cats = [...new Set(rows.map(r => r.category))].sort();
   const statuses = [...new Set(rows.map(r => r.status))].sort();
 
+  const q = search.trim().toLowerCase();
   const filtered = rows.filter(r =>
     (!catFilter || r.category === catFilter) &&
-    (!statusFilter || r.status === statusFilter)
+    (!statusFilter || r.status === statusFilter) &&
+    (!q || r.id.toLowerCase().includes(q) || r.from.toLowerCase().includes(q))
   );
 
   return (
@@ -264,6 +299,8 @@ function Inbox({ data, overrides, openCase }) {
       <h2>Inbox</h2>
       <p className="subtitle">{filtered.length} of {rows.length} emails</p>
       <div className="filters">
+        <input type="text" placeholder="Search by email ID or sender…" value={search}
+               onChange={e => setSearch(e.target.value)} style={{minWidth:240}} />
         <select value={catFilter} onChange={e => setCatFilter(e.target.value)}>
           <option value="">All categories</option>
           {cats.map(c => <option key={c} value={c}>{c}</option>)}
@@ -281,7 +318,7 @@ function Inbox({ data, overrides, openCase }) {
               <td className="mono">{r.id}</td>
               <td>{r.from}</td>
               <td>{r.subject}</td>
-              <td>{r.category}</td>
+              <td><CategoryTag category={r.category} /></td>
               <td><Badge status={r.status} />{r.reviewed && <span style={{marginLeft:6, color:"var(--text-dim)", fontSize:11}}>reviewed</span>}</td>
             </tr>
           ))}
@@ -315,14 +352,24 @@ function FieldRow({ fc }) {
   );
 }
 
-function CaseDetail({ id, data, overrides, back }) {
+function CaseDetail({ id, data, overrides, back, openCase }) {
   const d = data[id];
   const r = d.result;
   const ov = overrides[id];
+  const allIds = Object.keys(data);
+  const idx = allIds.indexOf(id);
+  const prevId = idx > 0 ? allIds[idx - 1] : null;
+  const nextId = idx < allIds.length - 1 ? allIds[idx + 1] : null;
 
   return (
     <div>
-      <span className="back-link" onClick={back}>← Back to inbox</span>
+      <div className="case-nav">
+        <span className="back-link" onClick={back}>← Back to inbox</span>
+        <div className="case-nav-btns">
+          <button className="btn" disabled={!prevId} onClick={() => prevId && openCase(prevId)}>← Previous</button>
+          <button className="btn" disabled={!nextId} onClick={() => nextId && openCase(nextId)}>Next →</button>
+        </div>
+      </div>
       <h2>{d.email.subject}</h2>
       <p className="subtitle">{id} · from {d.email.from} · {r.category}</p>
 
@@ -432,14 +479,19 @@ function App() {
   const [data, setData] = useState(null);
   const [overrides, setOverrides] = useState({});
   const [view, setView] = useState({ name: "home" });
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const resultsUrl = USING_FIREBASE ? `${FIREBASE_DB_URL}/results.json` : "results.json";
-    fetch(resultsUrl).then(r => r.json()).then(setData);
-    loadOverrides().then(setOverrides);
+    fetch(resultsUrl)
+      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+      .then(setData)
+      .catch(e => setError(e.message || "Failed to load results"));
+    loadOverrides().then(setOverrides).catch(() => {});
   }, []);
 
-  if (!data) return <div className="main"><p className="subtitle">Loading…</p></div>;
+  if (error) return <div className="main"><div className="state-message error">Couldn't load data ({error}). Try refreshing the page.</div></div>;
+  if (!data) return <div className="main"><div className="state-message">Loading ShipVerify…</div></div>;
 
   const openCase = (id) => setView({ name: "case", id });
 
@@ -449,7 +501,7 @@ function App() {
       <div className="main">
         {view.name === "home" && <Home data={data} overrides={overrides} />}
         {view.name === "inbox" && <Inbox data={data} overrides={overrides} openCase={openCase} />}
-        {view.name === "case" && <CaseDetail id={view.id} data={data} overrides={overrides} back={() => setView({name:"inbox"})} />}
+        {view.name === "case" && <CaseDetail id={view.id} data={data} overrides={overrides} back={() => setView({name:"inbox"})} openCase={openCase} />}
         {view.name === "review" && <ReviewQueue data={data} overrides={overrides} setOverrides={setOverrides} openCase={openCase} />}
       </div>
     </React.Fragment>
