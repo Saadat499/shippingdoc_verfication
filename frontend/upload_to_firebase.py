@@ -24,7 +24,7 @@ from pathlib import Path
 import requests
 
 # TODO: paste your database URL here, no trailing slash
-FIREBASE_DB_URL = "https://YOUR-PROJECT-default-rtdb.YOUR-REGION.firebasedatabase.app"
+FIREBASE_DB_URL = "https://shippingdoc-e1113-default-rtdb.firebaseio.com"
 
 
 def main():
