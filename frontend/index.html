@@ -376,7 +376,7 @@ function CaseDetail({ id, data, overrides, back, openCase }) {
       {ov && (
         <div className="reviewed-note">
           Reviewed → <strong>{ov.status}</strong>
-          {ov.defect_fields.length > 0 && <> (fields: {ov.defect_fields.join(", ")})</>}
+          {(ov.defect_fields || []).length > 0 && <> (fields: {(ov.defect_fields || []).join(", ")})</>}
           {ov.note && <> — {ov.note}</>}
         </div>
       )}
@@ -388,14 +388,14 @@ function CaseDetail({ id, data, overrides, back, openCase }) {
 
       {r.category !== "BL_COMPARISON" ? (
         <div className="panel empty">Not a document-comparison email — nothing to compare.</div>
-      ) : r.fields.length === 0 ? (
+      ) : (r.fields || []).length === 0 ? (
         <div className="panel">
           <Badge status={r.status} />
           {r.review_reason && <span style={{marginLeft:10, color:"var(--text-dim)"}}>{r.review_reason}</span>}
         </div>
       ) : (
         <div className="panel">
-          {r.fields.map(fc => <FieldRow key={fc.field} fc={fc} />)}
+          {(r.fields || []).map(fc => <FieldRow key={fc.field} fc={fc} />)}
         </div>
       )}
     </div>
@@ -444,7 +444,7 @@ function ReviewQueue({ data, overrides, setOverrides, openCase }) {
         <p className="subtitle">Reason: {r.review_reason || "unspecified"}</p>
         <div style={{whiteSpace:"pre-wrap", fontSize:13, marginBottom:14}}>{d.email.body}</div>
 
-        {r.fields.length > 0 && r.fields.map(fc => (
+        {(r.fields || []).length > 0 && (r.fields || []).map(fc => (
           <div key={fc.field} style={{fontSize:13, padding:"4px 0"}}>
             <strong>{fc.field.replaceAll("_"," ")}</strong> — SI: <span className="mono">{fc.si.raw || "—"}</span> · BL: <span className="mono">{fc.bl.raw || "—"}</span>
           </div>
