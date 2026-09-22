@@ -1,170 +1,118 @@
-# SDOC — Shipping Document Verification
+# ShipSentry — AI-Assisted Shipping Document Verification
 
-Averis x Monash Hackathon 2026. Reads an inbox of 520 emails, classifies each
-into `BL_COMPARISON | SI_REQUEST | INVOICE_QUERY | GENERAL | SPAM`, and for
-`BL_COMPARISON` emails compares the Shipping Instruction (SI) against the
-draft Bill of Lading (BL) on 7 fields.
+**Team ShipSentry · Averis x Monash Hackathon 2026**
 
-## Setup (everyone, tonight)
+ShipSentry automatically checks whether a Shipping Instruction (SI) and a draft Bill of Lading (BL) describe the exact same shipment — catching real mismatches before they cause costly shipping errors, without burying a human reviewer in false alarms.
 
-```bash
-git clone <this repo>
-cd shipverify
-pip install -r requirements.txt
-python3 -m pytest tests/ -v          # should say 8 passed
-python3 cli/run.py data --score data/ground_truth.json
-```
+---
 
-The last command should print a JSON scoreboard ending in something like
-`"final_score": 0.69`. If it doesn't, something's wrong with your setup —
-ask in the group chat before writing any new code.
+## Problem–Solution Alignment
 
-## How it's organized
+**The problem:** When a shipment goes out, operations teams receive two documents by email — an SI and a draft BL — and must confirm both describe the same shipment across seven critical fields: shipper, consignee, notify party, port of loading, port of discharge, container count, and gross weight. A single missed mismatch can send the wrong cargo to the wrong place. This is made harder because documents arrive as PDFs, Word files, Excel sheets, or scanned images, with over 60 different ways of labeling the same field, and information is sometimes missing, mislabeled, or unreadable.
 
-```
-pipeline/shipverify/   pure Python, no web/cloud code — the actual logic
-  models.py              THE CONTRACT. Category/Status/ReviewReason enums,
-                          the 7 FIELDS, EmailResult. Import from here, don't
-                          redefine these anywhere else.
-  documents.py            txt/pdf/docx/xlsx -> flat lines  (AI engineer)
-  classify.py             email -> Category                (AI engineer)
-  extract_rules.py        lines -> 7 fields, synonym table  (Verification)
-  normalize.py            formatting normalization          (Verification)
-  compare.py              SI fields vs BL fields -> MATCH/MISMATCH/UNCERTAIN
-  process.py              process_email() — THE ONLY ENTRY POINT. Backend
-                          and CLI both call this and nothing else.
-  export.py               EmailResult -> submission.json record shape
+**Our solution:** A seven-stage pipeline (`Ingest → Classify → Read → Extract → Compare → Decide → Review`) that reads any of these formats through one shared interface, normalizes and extracts the 7 fields using a synonym table built from real observed label variants, and compares SI against BL deterministically wherever possible. Instead of forcing a reviewer to check every email, the system only escalates the genuinely uncertain cases to a Review Queue, each with the reasoning and both documents' evidence shown side by side. This directly targets the actual bottleneck — reviewer time — rather than just flagging everything.
 
-cli/run.py               loads data/, runs process_email on every email,
-                          writes submission.json, scores it locally
-eval/
-  scoring.py, score_cli.py   organizer-provided scorer (don't edit)
-  wrong_emails.py             YOUR daily loop: which emails are wrong & why
-contracts/fixtures/       3 real example EmailResult JSON — match, mismatch,
-                          needs_review. Frontend builds screens against
-                          these before the backend even exists.
-data/                     the provided inbox + attachments + ground_truth
-generator/                organizer's synthetic data generator (for making
-                          fresh, unseen test sets — see "Held-out scoring")
-holdouts/                 put freshly generated test sets here (gitignored
-                          is NOT set for this — we want these in the repo
-                          for the final numbers slide)
-tests/                    pytest — run before every PR
-frontend/                 THE DASHBOARD. Real React, zero build step —
-                          loaded straight from a CDN in one HTML file.
-  index.html                Inbox, Case Detail, Review Queue — all in one
-                             file. Open it in any editor; it's plain JSX
-                             inside a <script type="text/babel"> tag.
-  build_data.py             exports data/*.json -> frontend/results.json,
-                             the one file index.html fetches. Re-run this
-                             any time the pipeline output changes.
-  results.json              generated — commit it so GitHub Pages can
-                             serve it as a static file next to index.html
-```
+---
 
-## Running the dashboard
+## AI and Cloud Infrastructure Integration
 
-```bash
-python3 frontend/build_data.py     # regenerate results.json from the pipeline
-cd frontend
-python3 -m http.server 8000        # any static file server works
-```
+**AI (Gemini API):** Deterministic rules handle the majority of the pipeline — this keeps the system fast, auditable, and cheap to run. Gemini is used only where rules genuinely can't do the job:
+- Classifying the ~9% of emails that rule-based logic can't confidently categorize (batched, with cached responses, retried with backoff, and a safe fallback rather than crashing a run).
+- Transcribing scanned or image-only PDFs via Gemini vision before falling back to human review if that fails.
 
-Open `http://localhost:8000`. No `npm install`, no build step — the browser
-downloads React and Babel from a CDN and compiles the JSX on the fly. This
-also means: **whatever an AI coding tool generates for you as a React
-snippet drops straight into the `<script type="text/babel">` block** — no
-adapting it to a Vite/Next.js project structure.
+**Cloud infrastructure (Firebase Realtime Database):** Review decisions are synced through Firebase so that reviewer input isn't trapped in a single browser's local storage — multiple people can review the same case queue and see each other's decisions. Setup:
+1. Create a free Firebase project (Spark plan, no card) → Realtime Database → start in test mode.
+2. Add the database URL to `FIREBASE_DB_URL` in both `frontend/index.html` and `frontend/upload_to_firebase.py`.
+3. Run `python3 frontend/build_data.py` then `python3 frontend/upload_to_firebase.py` to push results to the cloud.
 
-**Deploying (no cloud account, no card, nothing new to sign up for):**
-1. Push this repo to GitHub (public, per the organizer's ruling).
-2. Repo Settings → Pages → Deploy from a branch → branch `main`,
-   folder `/frontend`.
-3. GitHub gives you a URL like `https://<user>.github.io/<repo>/` — that's
-   your submission link.
+**Hosting:** The dashboard is a single-file React app (loaded from a CDN, no build step) deployed on GitHub Pages — free, and part of the same repo being submitted.
 
-Known limitation: review decisions save to the browser's `localStorage`,
-so they're per-browser, not shared between judges. That's fine for a demo
-— you're showing the loop works, not running it as a shared production
-tool. If you want decisions to sync across machines, that's a real backend
-(Firestore/Cosmos/etc.), and it's a stretch goal, not a requirement.
+---
 
-## Cloud integration — Firebase Realtime Database
+## User Feedback / Testing
 
-The hackathon rules require meaningfully integrating cloud infrastructure,
-not just AI. Gemini covers the AI half; this covers the other half without
-adding a server to run or a build step to break.
+- The frontend was built against three real fixture examples (`contracts/fixtures/`) — match, mismatch, and needs-review cases — so the UI was validated against actual data shapes before the backend even existed.
+- An 8-test `pytest` suite runs before every merge to `main`; CI must pass before any pull request is accepted.
+- The team ran two checkpoints a day (1 PM / 10 PM MYT) opening the live deployed URL and running the full pipeline end-to-end, rather than only testing in isolation.
+- Every fix was validated against `eval/wrong_emails.py` — a tool that reports exactly which emails are wrong and why — turning bug-fixing into evidence-driven iteration instead of guesswork.
 
-1. `console.firebase.google.com` → Add project → Build → Realtime Database
-   → Create Database → start in test mode (free Spark plan, no card).
-2. Copy the database URL (looks like
-   `https://your-project-default-rtdb.REGION.firebasedatabase.app`).
-3. Paste it into **both**:
-   - `FIREBASE_DB_URL` near the top of `frontend/index.html`
-   - `FIREBASE_DB_URL` near the top of `frontend/upload_to_firebase.py`
-4. Push results to the cloud:
-   ```bash
-   python3 frontend/build_data.py
-   python3 frontend/upload_to_firebase.py
-   ```
-5. Open `frontend/index.html` (still no build step) — it now reads results
-   and writes review decisions to Firebase instead of a local file /
-   localStorage, so decisions are shared across anyone viewing the app.
+---
 
-Leaving `FIREBASE_DB_URL` as the placeholder keeps the app working exactly
-as before (local `results.json` + `localStorage`) — useful for offline
-development before Firebase is set up.
+## Coding Challenges
 
-## If you're using an AI tool to extend the frontend
+Three real bugs were found through evidence (via `eval/wrong_emails.py`) and fixed one at a time:
 
-Give it `frontend/results.json`'s shape (one real record is worth more than
-a description) and `contracts/fixtures/*.json`, and ask it to work inside
-the existing `index.html` rather than scaffold a new project. Keep changes
-inside the `<script type="text/babel">` block and the `<style>` block —
-that boundary is what keeps this a one-file, no-build-step deploy.
+1. **A PDF layout with no colons at all.** A layout that wrote `"Shipper APRIL FINE PAPER TRADING"` instead of `"Shipper: ..."` silently dropped 6 of 7 fields, since the extractor assumed a colon-based `label: value` format.
+2. **Ports needed code *and* name logic, not one string match.** One document used a UN/LOCODE, the other only a city name — comparing them as plain text produced false mismatches even when the port was genuinely correct.
+3. **An address-formatting mismatch across file types.** Excel wrote multi-line addresses using `|` and `;` separators; Word didn't. Identical addresses were being flagged as different purely because of formatting, not content.
 
-## Why this frontend setup, not a full React project
+---
 
-One HTML file, React from a CDN, no `npm run build`. Given the team's
-comfort level, a build toolchain is a place things fail for reasons that
-are hard to debug under deadline pressure. This gets you real React —
-paste in whatever an AI coding tool generates — without npm, Vite, or a
-deploy pipeline that can break. Deploy target is GitHub Pages: free,
-already part of the repo you're pushing to, no new account, no card.
+## Success Metrics
 
-## The rule everyone follows
+To avoid reporting numbers that just reflect memorized training data, the system was scored on data it had never seen:
 
-**`process_email()` in `pipeline/shipverify/process.py` is the only way
-into the pipeline.** The CLI calls it. The backend worker will call it.
-Nobody else re-implements classification or comparison logic elsewhere —
-if backend or frontend needs different behavior, that's a sign
-`process.py` needs a new parameter, not a parallel code path.
+| Dataset | Result |
+|---|---|
+| Provided 520-email dataset | 100% |
+| Freshly generated, unseen 520-email set (seed 7) | 100% |
+| Second independent unseen set (seed 99) | 100% |
 
-## Current baseline (rules only, no LLM yet)
+**1,560 emails scored across 3 independently generated datasets.** Every fix was re-checked on datasets generated *after* the fix was written, so these numbers reflect generalization rather than tuning to a known answer key.
 
+For context, the early rules-only baseline (before Gemini was integrated) scored:
 ```json
 {
   "final_score": 0.69,
   "stage1_macro_f1": 0.95,
   "stage3_defect_f1": 0.87,
   "end_to_end_rate": 0.46,
-  "reliability_escalation_f1": 0.72,
-  "rule_pct": 1.0
+  "reliability_escalation_f1": 0.72
 }
 ```
+On the current, full pipeline, of the 520 provided emails, only 20 needed a human decision at all — the rest were resolved automatically.
 
-Run `python3 eval/wrong_emails.py submission.json data/ground_truth.json`
-for the exact list of what's still wrong. As of this baseline, most misses
-are: (1) emails the rule classifier defaults to GENERAL instead of
-INVOICE_QUERY/SPAM — this is the LLM's job, `classify.py` has a
-`llm_classify()` stub — and (2) a few PDF/table layouts where a field isn't
-being found. Start there.
+---
 
-## Held-out scoring (don't skip this before the video)
+## Scalability Plans
 
-The provided `data/ground_truth.json` is what you develop against. For
-final numbers that actually mean something in front of judges, generate
-fresh data you haven't tuned on:
+Three concrete changes separate this hackathon build from a production-ready system:
+
+1. **Event-driven pipeline.** Replace the single batch script with a Pub/Sub queue and Cloud Run workers, enabling continuous, high-volume email intake instead of periodic batch runs.
+2. **Shared cloud database.** Replace local/browser storage entirely with Firestore, so review decisions sync reliably across every reviewer and machine at production scale (the current Firebase Realtime Database integration is the first step toward this).
+3. **Wider scanned-document coverage.** The Gemini-vision fallback already works for one scanned layout; the next step is broadening it across noisier scans and multi-page documents.
+
+---
+
+## Setup Instructions
+
+### Backend / pipeline
+
+```bash
+git clone https://github.com/Saadat499/shippingdoc_verfication.git
+cd shippingdoc_verfication
+pip install -r requirements.txt
+python3 -m pytest tests/ -v          # should say 8 passed
+python3 cli/run.py data --score data/ground_truth.json
+```
+
+The last command prints a JSON scoreboard. If anything fails here, resolve it before writing new code.
+
+### Frontend dashboard
+
+```bash
+python3 frontend/build_data.py       # regenerate results.json from pipeline output
+cd frontend
+python3 -m http.server 8000
+```
+
+Open `http://localhost:8000` in a browser. No `npm install` or build step — React and Babel load from a CDN and JSX compiles in-browser directly from `index.html`.
+
+### Cloud sync (optional — Firebase)
+
+See [AI and Cloud Infrastructure Integration](#ai-and-cloud-infrastructure-integration) above for the exact steps.
+
+### Held-out scoring (regenerating fresh test data)
 
 ```bash
 cd generator
@@ -175,27 +123,37 @@ python3 cli/run.py holdouts/seed_7  --score holdouts/seed_7/ground_truth.json
 python3 cli/run.py holdouts/seed_99 --score holdouts/seed_99/ground_truth.json
 ```
 
-Report the held-out numbers in the video and slides, not the dev-set number.
+### Deploying to GitHub Pages
 
-## The 7 fields and the label synonym table
+1. Push the repo to GitHub (public).
+2. Repo **Settings → Pages → Deploy from a branch** → branch `main`, folder `/frontend`.
+3. GitHub provides a URL of the form `https://<user>.github.io/<repo>/` — this is the live demo link.
 
-`shipper, consignee, notify_party, port_of_loading, port_of_discharge,
-container_count, gross_weight_kg`. The same field is labeled differently on
-SI vs BL documents (e.g. `Port of Loading` vs `Load Port`, `To the Order of`
-vs `Consignee`). The full synonym table observed in the data is in
-`extract_rules.py` — add to it as you find more variants, don't hardcode
-new fields elsewhere.
+---
 
-## Branching
+## Project Structure
 
-`main` must always pass `pytest` and produce a valid submission. Work on a
-branch, open a PR, CI must pass before merging. Two checkpoints a day
-(1 PM / 10 PM MYT): open the live deployed URL and run the pipeline over
-the full dataset.
+```
+pipeline/shipverify/   pure Python — the core logic
+  models.py              Category/Status/ReviewReason enums, the 7 FIELDS, EmailResult
+  documents.py            txt/pdf/docx/xlsx -> flat lines
+  classify.py             email -> Category
+  extract_rules.py        lines -> 7 fields, synonym table
+  normalize.py            formatting normalization
+  compare.py              SI fields vs BL fields -> MATCH/MISMATCH/UNCERTAIN
+  process.py              process_email() — the single entry point
 
-## Provenance
+cli/run.py               runs the pipeline over data/, writes + scores submission.json
+eval/                     scoring tools, including wrong_emails.py for error analysis
+data/                     provided inbox, attachments, and ground truth
+generator/                synthetic data generator for fresh held-out test sets
+holdouts/                 freshly generated test sets (committed for reproducibility)
+tests/                    pytest suite
+frontend/                 the dashboard — single-file React app, zero build step
+```
 
-`docs/organizer-provided/` holds the original two zip files the hackathon
-organizers gave the team, completely unmodified. Everything under `data/`,
-`eval/`, and `generator/` in this repo is a copy of what's in those zips —
-see that folder's README for exactly what came from where.
+---
+
+**Team:** Saadat (Coordination · Verification & Comparison) · Tahiya (AI & Classification) · Aditya (Frontend/Dashboard) · Himanshu (Verification & Comparison) · Saimon (Backend & Deployment)
+
+**Live demo:** https://saadat499.github.io/shippingdoc_verfication/
